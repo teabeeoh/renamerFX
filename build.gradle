@@ -1,0 +1,35 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'groovy'
+//apply from: "javafx.plugin"
+apply from: "http://dl.bintray.com/content/shemnon/javafx-gradle/0.4.0/javafx.plugin"
+
+sourceCompatibility = 1.7
+version = '0.1'
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+repositories {
+    mavenCentral()
+
+}
+// In this section you declare the dependencies for your production and test code
+dependencies {
+    testCompile "junit:junit:4.11"
+}
+
+jar {
+    manifest.attributes provider: 'Thomas Bolz'
+}
+
+javafx {
+    appID 'RenamerFX'
+    appName 'RenamerFX'
+    mainClass 'sample.Main'
+
+
+}
