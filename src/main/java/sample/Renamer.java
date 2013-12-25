@@ -10,15 +10,22 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.stage.DirectoryChooser;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.EnumSet;
 import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
 
 
 public class Renamer {
+
+    Log log = LogFactory.getLog(this.getClass());
 
     public static final String SRC_DIR = "srcDir";
     private static final String TARGET_DIR = "targetDir";
@@ -117,10 +124,67 @@ public class Renamer {
     @FXML
     void rename(ActionEvent event) {
         System.out.println("Renaming files");
-        File srcDirectory = new File(lblSource.getText());
-        if (srcDirectory != null && srcDirectory.isDirectory()) {
-            walkFileTree(srcDirectory);
+        txtOut.clear();
+        final Path source = getSrcDirectory().toPath();
+        final Path target = getTargetDirectory().toPath();
+        log.info("source path: " + source);
+        log.info("target path: " + target);
+        try {
+            Files.walkFileTree(source, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE,
+                    new SimpleFileVisitor<Path>() {
+
+                        String currentDirectoryName = "";
+                        String fileNamePattern = "";
+                        int counter = 1;
+
+                        @Override
+                        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                                throws IOException {
+                            Path targetdir = target.resolve(source.relativize(dir));
+                            currentDirectoryName = dir.getFileName().toString();
+                            log.info("**** current directory: " + currentDirectoryName);
+                            try {
+                                Files.copy(dir, targetdir);
+                                String message = "directory copyied from " + dir + " to " + targetdir;
+                                log.info(message);
+                                txtOut.appendText(message + "\n");
+                            } catch (FileAlreadyExistsException e) {
+//                                if (!Files.isDirectory(targetdir)) {
+//                                    System.out.println("File is directory");
+//                                }
+//                                    throw e;
+                                String message = "directory " + dir + " already exists in " + targetdir;
+                                log.info(message);
+                                txtOut.appendText(message + "\n");
+                            }
+                            return FileVisitResult.CONTINUE;
+                        }
+
+                        @Override
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                                throws IOException {
+                            try {
+                                String filename = currentDirectoryName + "_" + String.format("%02d", counter++);
+                                log.debug("++ " + filename);
+//                                file = Paths.get(file.getParent().toString(), file)
+                                Files.copy(file, target.resolve(source.relativize(file)));
+                                String message = "copied from " + file + " to " + target.resolve(source.relativize(file));
+                                log.info(message);
+                                txtOut.appendText(message + "\n");
+                            } catch (FileAlreadyExistsException e) {
+                                String message = "file " + file + " already exists";
+                                log.info(message);
+                                txtOut.appendText(message + "\n");
+                            }
+                            return FileVisitResult.CONTINUE;
+                        }
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+//        if (srcDirectory != null && srcDirectory.isDirectory()) {
+//            walkFileTree(srcDirectory);
+//        }
 
     }
 
