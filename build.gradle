@@ -26,6 +26,7 @@ dependencies {
 //    runtime 'commons-logging:commons-logging:1.1.1'
 
     testCompile "junit:junit:4.11"
+
 }
 
 jar {
@@ -37,5 +38,22 @@ javafx {
     appName 'RenamerFX'
     mainClass 'sample.Main'
 
+    // deplpy/info attributes
+    category = 'demo'
+    copyright = 'Copyright (c) 2014 Thomas Bolz'
+    description = '''RenamerFX Application'''
+    licenseType = '3 clause BSD'
+    vendor = 'ThomasBolz.'
 
+    // deploy/preferences attributes
+    installSystemWide = true
+    menu = true
+    shortcut = true
+
+    // app icons
+//    icons {
+//        shortcut = ['shortcut-16.png', 'shortcut-32.png', 'shortcut-128.png', 'shortcut-256.png', 'shortcut-16@2x.png', 'shortcut-32@2x.png', 'shortcut-128@2x.png']
+//        volume = 'javafx-icon.png'
+//        setup = 'javafx-icon.png'
+//    }
 }

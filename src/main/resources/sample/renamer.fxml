@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/2.2" fx:controller="sample.RenamerGUI">
+    <children>
+        <GridPane id="GridPane" hgap="10.0" maxWidth="1.7976931348623157E308" minWidth="-Infinity" vgap="10.0"
+                  AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0"
+                  AnchorPane.topAnchor="14.0">
+            <children>
+                <Button fx:id="btnSource" mnemonicParsing="false" onAction="#changeSrc" prefWidth="122.0"
+                        text="src Directory" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <Label fx:id="lblSource" maxWidth="1.7976931348623157E308" prefWidth="-1.0" text="Label"
+                       GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0"/>
+                <Button fx:id="btnTarget" mnemonicParsing="false" onAction="#changeTarget" text="target Directory"
+                        GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <Label fx:id="lblTarget" maxWidth="1.7976931348623157E308" prefWidth="-1.0" text="Label"
+                       GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1"/>
+                <Label fx:id="lblDirs" maxHeight="-Infinity" maxWidth="-Infinity" prefWidth="122.0" text="Directories:"
+                       GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <Label fx:id="lblFiles" maxWidth="-Infinity" prefWidth="122.0" text="Files:" GridPane.columnIndex="0"
+                       GridPane.rowIndex="3"/>
+                <ProgressBar fx:id="progressDirs" maxWidth="1.7976931348623157E308" prefWidth="-1.0" progress="0.0"
+                             GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2"/>
+                <ProgressBar fx:id="progressFiles" maxWidth="1.7976931348623157E308" prefWidth="-1.0" progress="0.0"
+                             GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3"/>
+                <Button fx:id="btnRename" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#rename"
+                        text="Rename files" GridPane.columnIndex="0" GridPane.columnSpan="2147483647"
+                        GridPane.rowIndex="4"/>
+                <TextArea fx:id="txtOut" prefHeight="231.0" prefWidth="572.0" wrapText="true" GridPane.columnIndex="0"
+                          GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.rowIndex="5"/>
+            </children>
+            <columnConstraints>
+                <ColumnConstraints hgrow="NEVER" maxWidth="1.7976931348623157E308" minWidth="-Infinity"/>
+                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0"/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES"/>
+                <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER"/>
+                <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER"/>
+                <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES"/>
+                <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER"/>
+                <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+            </rowConstraints>
+        </GridPane>
+    </children>
+</AnchorPane>
