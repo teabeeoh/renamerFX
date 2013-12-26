@@ -1,4 +1,7 @@
 .idea/
+.gradle/
+out/
+build/
 renamerFX.iml
 renamerFX.ipr
 renamerFX.iws
