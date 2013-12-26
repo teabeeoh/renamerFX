@@ -19,11 +19,13 @@ import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
 
 
-public class Renamer {
+public class RenamerGUI {
 
     Log log = LogFactory.getLog(this.getClass());
 
@@ -123,39 +125,46 @@ public class Renamer {
 
     @FXML
     void rename(ActionEvent event) {
-        System.out.println("Renaming files");
+        log.info("Renaming files");
         txtOut.clear();
         final Path source = getSrcDirectory().toPath();
         final Path target = getTargetDirectory().toPath();
         log.info("source path: " + source);
         log.info("target path: " + target);
+        final Map<String, Integer> counters = new HashMap<String, Integer>();
         try {
             Files.walkFileTree(source, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE,
                     new SimpleFileVisitor<Path>() {
 
                         String currentDirectoryName = "";
                         String fileNamePattern = "";
-                        int counter = 1;
 
+                        /**
+                         * If we find a directory create/copy it and add a counter
+                         *
+                         * @param dir
+                         * @param attrs
+                         * @return
+                         * @throws IOException
+                         */
                         @Override
                         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
                                 throws IOException {
                             Path targetdir = target.resolve(source.relativize(dir));
                             currentDirectoryName = dir.getFileName().toString();
+                            counters.put(currentDirectoryName, new Integer(1));
                             log.info("**** current directory: " + currentDirectoryName);
                             try {
                                 Files.copy(dir, targetdir);
-                                String message = "directory copyied from " + dir + " to " + targetdir;
+                                String message = "created directory " + targetdir;
                                 log.info(message);
                                 txtOut.appendText(message + "\n");
                             } catch (FileAlreadyExistsException e) {
-//                                if (!Files.isDirectory(targetdir)) {
-//                                    System.out.println("File is directory");
-//                                }
-//                                    throw e;
-                                String message = "directory " + dir + " already exists in " + targetdir;
-                                log.info(message);
-                                txtOut.appendText(message + "\n");
+                                if (!dir.equals(source)) {
+                                    String message = "directory " + targetdir + " already exists ";
+                                    log.info(message);
+                                    txtOut.appendText(message + "\n");
+                                }
                             }
                             return FileVisitResult.CONTINUE;
                         }
@@ -164,11 +173,14 @@ public class Renamer {
                         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                                 throws IOException {
                             try {
-                                String filename = currentDirectoryName + "_" + String.format("%02d", counter++);
+                                currentDirectoryName = file.getParent().getFileName().toString();
+                                Path targetFile;
+                                String filename = currentDirectoryName + "_" + String.format("%02d", counters.get(currentDirectoryName)) + "." + file.toString().substring(file.toString().lastIndexOf('.') + 1).toLowerCase();
+                                counters.put(currentDirectoryName, counters.get(currentDirectoryName) + 1);
                                 log.debug("++ " + filename);
-//                                file = Paths.get(file.getParent().toString(), file)
-                                Files.copy(file, target.resolve(source.relativize(file)));
-                                String message = "copied from " + file + " to " + target.resolve(source.relativize(file));
+                                targetFile = target.resolve(source.relativize(Paths.get(file.getParent().toString(), filename)));
+                                Files.copy(file, targetFile);
+                                String message = "copied from " + file + " to " + targetFile;
                                 log.info(message);
                                 txtOut.appendText(message + "\n");
                             } catch (FileAlreadyExistsException e) {
