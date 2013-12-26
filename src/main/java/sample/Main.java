@@ -12,7 +12,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("renamer.fxml"));
         primaryStage.setTitle("RenamerFX");
-        primaryStage.setScene(new Scene(root));
+        primaryStage.setScene(new Scene(root, 1000, 800));
         primaryStage.show();
     }
 
