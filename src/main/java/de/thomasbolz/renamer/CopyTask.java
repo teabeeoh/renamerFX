@@ -21,7 +21,7 @@ import java.nio.file.Path;
 /**
  * Created by Thomas Bolz on 28.12.13.
  */
-public class CopyTask {
+class CopyTask {
     private Path sourceFile;
     private Path targetFile;
 
