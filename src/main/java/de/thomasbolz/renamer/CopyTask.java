@@ -25,6 +25,10 @@ public class CopyTask {
     private Path sourceFile;
     private Path targetFile;
 
+    public void setTargetFile(Path targetFile) {
+        this.targetFile = targetFile;
+    }
+
     public Path getSourceFile() {
         return sourceFile;
     }
