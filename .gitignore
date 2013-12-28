@@ -3,6 +3,7 @@
 out/
 build/
 gradle/
+target/
 gradlew*
 renamerFX.iml
 renamerFX.ipr
