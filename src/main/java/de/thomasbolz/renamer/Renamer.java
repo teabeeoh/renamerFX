@@ -29,25 +29,23 @@ import java.util.*;
  */
 public class Renamer {
 
-    private Log log = LogFactory.getLog(this.getClass());
-    private Path source;
-    private Path target;
+    private final Log log = LogFactory.getLog(this.getClass());
+    private final Path source;
+    private final Path target;
+    private final SortedMap<Path, List<CopyTask>> result;
 
     public Renamer(Path source, Path target) {
         this.source = source;
         this.target = target;
+        result = new TreeMap<>();
     }
 
     public Map<Path, List<CopyTask>> prepareCopyTasks() {
-        final Map<Path, List<CopyTask>> result = new HashMap<>();
 
-        final Map<Path, Integer> counters = new HashMap<>();
+
         try {
             Files.walkFileTree(source, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE,
                     new SimpleFileVisitor<Path>() {
-
-                        String currentDirectoryName = "";
-                        String fileNamePattern = "";
 
                         /**
                          * If we find a directory create/copy it and add a counter
@@ -61,9 +59,7 @@ public class Renamer {
                         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
                                 throws IOException {
                             Path targetdir = target.resolve(source.relativize(dir));
-                            counters.put(dir, new Integer(1));
                             result.put(dir, new ArrayList<CopyTask>());
-                            result.get(dir).add(new CopyTask(dir, targetdir));
                             return FileVisitResult.CONTINUE;
                         }
 
@@ -72,33 +68,66 @@ public class Renamer {
                                 throws IOException {
                             Path parentPath = file.getParent();
                             Path targetFile;
-                            String filename = parentPath.getFileName() + "_" + String.format("%02d", counters.get(parentPath)) + "." + file.toString().substring(file.toString().lastIndexOf('.') + 1).toLowerCase();
-                            counters.put(parentPath, counters.get(parentPath) + 1);
-                            targetFile = target.resolve(source.relativize(Paths.get(parentPath.toString(), filename)));
-                            result.get(parentPath).add(new CopyTask(file, targetFile));
+                            result.get(parentPath).add(new CopyTask(file, null));
                             return FileVisitResult.CONTINUE;
                         }
                     });
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        sortCopyTasks();
+        generateTargetFilenames();
         return result;
     }
 
+    private void sortCopyTasks() {
+        for (Path path : result.keySet()) {
+            final List<CopyTask> copyTasks = result.get(path);
+            Collections.sort(copyTasks, new Comparator<CopyTask>() {
+                @Override
+                public int compare(CopyTask o1, CopyTask o2) {
+                    return o1.getSourceFile().compareTo(o2.getSourceFile());
+                }
+            });
+        }
+    }
+
+    private void generateTargetFilenames() {
+        for (Path path : result.keySet()) {
+            int counter = 1;
+            for (CopyTask copyTask : result.get(path)) {
+                String targetFilename = path.getFileName() + "_" + String.format("%02d", counter) + "." + copyTask.getSourceFile().toString().substring(copyTask.getSourceFile().toString().lastIndexOf('.') + 1).toLowerCase();
+                copyTask.setTargetFile(target.resolve(source.relativize(Paths.get(path.toString(), targetFilename))));
+                counter++;
+            }
+        }
+
+    }
+
     public void executeCopyTasks(Map<Path, List<CopyTask>> pathListMap) {
-        for (Path parentPath : pathListMap.keySet()) {
-            for (CopyTask task : pathListMap.get(parentPath)) {
+        log.info("Start executing CopyTasks");
+        for (Path dir : pathListMap.keySet()) {
+            Path targetDir = target.resolve(source.relativize(dir));
+            try {
+                if (!dir.equals(source)) {
+                    Files.copy(dir, targetDir);
+                }
+            } catch (FileAlreadyExistsException e) {
+                log.error("Directory already exists " + targetDir, e);
+            } catch (IOException e) {
+                log.error("IO Exception while trying to create directory " + targetDir, e);
+            }
+            for (CopyTask task : pathListMap.get(dir)) {
                 try {
                     Files.copy(task.getSourceFile(), task.getTargetFile());
                 } catch (FileAlreadyExistsException e) {
-                    log.error("File/Directory already exists " + task.getTargetFile(), e);
+                    log.error("File already exists " + task.getTargetFile(), e);
                 } catch (IOException e) {
                     log.error("IO Exception while trying to execute CopyTask " + task, e);
-                    System.exit(0);
                 }
             }
         }
+        log.info("Finished executing CopyTasks");
     }
 
 }
