@@ -42,6 +42,8 @@ dependencies {
 //    runtime 'commons-logging:commons-logging:1.1.1'
 
     testCompile "junit:junit:4.11"
+    testCompile 'commons-io:commons-io:2.4'
+
 
 }
 
