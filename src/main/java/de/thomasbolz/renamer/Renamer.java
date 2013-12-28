@@ -67,7 +67,6 @@ public class Renamer {
                         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                                 throws IOException {
                             Path parentPath = file.getParent();
-                            Path targetFile;
                             result.get(parentPath).add(new CopyTask(file, null));
                             return FileVisitResult.CONTINUE;
                         }

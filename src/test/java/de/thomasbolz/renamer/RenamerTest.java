@@ -17,6 +17,8 @@
 package de.thomasbolz.renamer;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,43 +35,45 @@ import java.util.Map;
  */
 public class RenamerTest {
 
-    Path source;
-    Path target;
+    private Log log = LogFactory.getLog(this.getClass());
+
+    private Path source;
+    private Path target;
 
     @Before
     public void setUp() throws Exception {
         source = Paths.get(new File(".").getCanonicalPath(), "source");
         target = Paths.get(new File(".").getCanonicalPath(), "target");
-        if (target.toFile().listFiles().length <= 5) {
+        if (!target.toFile().exists() || target.toFile().listFiles().length <= 5) {
             FileUtils.deleteDirectory(target.toFile());
             Files.createDirectories(target);
         }
-//        Files.copy(Paths.get("/Users/cgi/Documents/workspaces/idea/renamerFX/source/dir1/dir1_3"), Paths.get("/Users/cgi/Documents/workspaces/idea/renamerFX/target/dir1/dir1_3"));
-        System.out.println(source);
-        System.out.println(target);
-//        System.exit(0);
+        log.debug(source);
+        log.debug(target);
 
 
     }
 
     @After
     public void tearDown() throws Exception {
-
+        if (!target.toFile().exists() || target.toFile().listFiles().length <= 5) {
+            FileUtils.deleteDirectory(target.toFile());
+        }
     }
 
     @Test
     public void testPrepareCopyTasks() throws Exception {
 
-        System.out.println("\n*** testPrepareCopyTasks ***\n");
+        log.debug("\n*** testPrepareCopyTasks ***\n");
         Renamer renamer = new Renamer(source, target);
         final Map<Path, List<CopyTask>> pathListMap = renamer.prepareCopyTasks();
         for (Path path : pathListMap.keySet()) {
-            System.out.println("Copying the following files for path " + path);
+            log.debug("Copying the following files for path " + path);
             for (CopyTask copyTask : pathListMap.get(path)) {
-                System.out.println(copyTask);
+                log.debug(copyTask);
             }
         }
-        System.out.println(pathListMap);
+        log.debug(pathListMap);
         renamer.executeCopyTasks(pathListMap);
 
     }
