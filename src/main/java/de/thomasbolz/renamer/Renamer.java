@@ -19,6 +19,8 @@ package de.thomasbolz.renamer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -33,11 +35,22 @@ public class Renamer {
     private final Path source;
     private final Path target;
     private final SortedMap<Path, List<CopyTask>> result;
+    private final static String EXLUSION_REGEX = "\\..*";
+    private final List<Path> excludedFiles;
+
+    public SortedMap<Path, List<CopyTask>> getResult() {
+        return result;
+    }
+
+    public List<Path> getExcludedFiles() {
+        return excludedFiles;
+    }
 
     public Renamer(Path source, Path target) {
         this.source = source;
         this.target = target;
         result = new TreeMap<>();
+        excludedFiles = new ArrayList();
     }
 
     public Map<Path, List<CopyTask>> prepareCopyTasks() {
@@ -66,8 +79,11 @@ public class Renamer {
                         @Override
                         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                                 throws IOException {
-                            Path parentPath = file.getParent();
-                            result.get(parentPath).add(new CopyTask(file, null));
+                            if (!file.getFileName().toString().matches(EXLUSION_REGEX)) {
+                                result.get(file.getParent()).add(new CopyTask(file, null));
+                            } else {
+                                excludedFiles.add(file);
+                            }
                             return FileVisitResult.CONTINUE;
                         }
                     });
@@ -103,9 +119,9 @@ public class Renamer {
 
     }
 
-    public void executeCopyTasks(Map<Path, List<CopyTask>> pathListMap) {
+    public void executeCopyTasks() {
         log.info("Start executing CopyTasks");
-        for (Path dir : pathListMap.keySet()) {
+        for (Path dir : result.keySet()) {
             Path targetDir = target.resolve(source.relativize(dir));
             try {
                 if (!dir.equals(source)) {
@@ -116,7 +132,7 @@ public class Renamer {
             } catch (IOException e) {
                 log.error("IO Exception while trying to create directory " + targetDir, e);
             }
-            for (CopyTask task : pathListMap.get(dir)) {
+            for (CopyTask task : result.get(dir)) {
                 try {
                     Files.copy(task.getSourceFile(), task.getTargetFile());
                 } catch (FileAlreadyExistsException e) {
@@ -129,4 +145,16 @@ public class Renamer {
         log.info("Finished executing CopyTasks");
     }
 
+    private class DefaultFileFilter implements FileFilter {
+
+
+        @Override
+        public boolean accept(File file) {
+            if (file != null && !file.getName().matches(EXLUSION_REGEX)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
 }

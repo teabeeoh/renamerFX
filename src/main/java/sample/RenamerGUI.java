@@ -16,6 +16,7 @@
 
 package sample;
 
+import de.thomasbolz.renamer.Renamer;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -141,6 +142,9 @@ public class RenamerGUI {
 
     @FXML
     void rename(ActionEvent event) {
+        Renamer renamer = new Renamer(getSrcDirectory().toPath(), getTargetDirectory().toPath());
+        renamer.prepareCopyTasks();
+        renamer.executeCopyTasks();
         log.info("Renaming files");
         txtOut.clear();
         final Path source = getSrcDirectory().toPath();

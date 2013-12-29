@@ -57,7 +57,7 @@ public class RenamerTest {
     @After
     public void tearDown() throws Exception {
         if (!target.toFile().exists() || target.toFile().listFiles().length <= 5) {
-            FileUtils.deleteDirectory(target.toFile());
+//            FileUtils.deleteDirectory(target.toFile());
         }
     }
 
@@ -74,7 +74,8 @@ public class RenamerTest {
             }
         }
         log.debug(pathListMap);
-        renamer.executeCopyTasks(pathListMap);
+        renamer.executeCopyTasks();
+        log.debug(renamer.getExcludedFiles());
 
     }
 }
