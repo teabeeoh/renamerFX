@@ -34,12 +34,12 @@ public class Renamer {
     private final Log log = LogFactory.getLog(this.getClass());
     private final Path source;
     private final Path target;
-    private final SortedMap<Path, List<CopyTask>> result;
+    private final SortedMap<Path, List<CopyTask>> copyTasks;
     private final static String EXLUSION_REGEX = "\\..*";
     private final List<Path> excludedFiles;
 
-    public SortedMap<Path, List<CopyTask>> getResult() {
-        return result;
+    public SortedMap<Path, List<CopyTask>> getCopyTasks() {
+        return copyTasks;
     }
 
     public List<Path> getExcludedFiles() {
@@ -49,7 +49,7 @@ public class Renamer {
     public Renamer(Path source, Path target) {
         this.source = source;
         this.target = target;
-        result = new TreeMap<>();
+        copyTasks = new TreeMap<>();
         excludedFiles = new ArrayList();
     }
 
@@ -72,7 +72,7 @@ public class Renamer {
                         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
                                 throws IOException {
                             Path targetdir = target.resolve(source.relativize(dir));
-                            result.put(dir, new ArrayList<CopyTask>());
+                            copyTasks.put(dir, new ArrayList<CopyTask>());
                             return FileVisitResult.CONTINUE;
                         }
 
@@ -80,7 +80,7 @@ public class Renamer {
                         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                                 throws IOException {
                             if (!file.getFileName().toString().matches(EXLUSION_REGEX)) {
-                                result.get(file.getParent()).add(new CopyTask(file, null));
+                                copyTasks.get(file.getParent()).add(new CopyTask(file, null));
                             } else {
                                 excludedFiles.add(file);
                             }
@@ -92,12 +92,12 @@ public class Renamer {
         }
         sortCopyTasks();
         generateTargetFilenames();
-        return result;
+        return copyTasks;
     }
 
     private void sortCopyTasks() {
-        for (Path path : result.keySet()) {
-            final List<CopyTask> copyTasks = result.get(path);
+        for (Path path : copyTasks.keySet()) {
+            final List<CopyTask> copyTasks = this.copyTasks.get(path);
             Collections.sort(copyTasks, new Comparator<CopyTask>() {
                 @Override
                 public int compare(CopyTask o1, CopyTask o2) {
@@ -108,9 +108,9 @@ public class Renamer {
     }
 
     private void generateTargetFilenames() {
-        for (Path path : result.keySet()) {
+        for (Path path : copyTasks.keySet()) {
             int counter = 1;
-            for (CopyTask copyTask : result.get(path)) {
+            for (CopyTask copyTask : copyTasks.get(path)) {
                 String targetFilename = path.getFileName() + "_" + String.format("%02d", counter) + "." + copyTask.getSourceFile().toString().substring(copyTask.getSourceFile().toString().lastIndexOf('.') + 1).toLowerCase();
                 copyTask.setTargetFile(target.resolve(source.relativize(Paths.get(path.toString(), targetFilename))));
                 counter++;
@@ -121,7 +121,7 @@ public class Renamer {
 
     public void executeCopyTasks() {
         log.info("Start executing CopyTasks");
-        for (Path dir : result.keySet()) {
+        for (Path dir : copyTasks.keySet()) {
             Path targetDir = target.resolve(source.relativize(dir));
             try {
                 if (!dir.equals(source)) {
@@ -132,7 +132,7 @@ public class Renamer {
             } catch (IOException e) {
                 log.error("IO Exception while trying to create directory " + targetDir, e);
             }
-            for (CopyTask task : result.get(dir)) {
+            for (CopyTask task : copyTasks.get(dir)) {
                 try {
                     Files.copy(task.getSourceFile(), task.getTargetFile());
                 } catch (FileAlreadyExistsException e) {
