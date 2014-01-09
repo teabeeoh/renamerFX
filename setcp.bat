@@ -1,3 +1,6 @@
+REM ***
+REM this must be run before creating native installers with the gradle javafx plugin
+REM ***
 set JAVA_HOME="C:\Program Files\Java\jdk1.8.0"
 REM adding JAVA executables
 set PATH=%JAVA_HOME%\bin;%PATH%
