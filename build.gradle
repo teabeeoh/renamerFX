@@ -37,10 +37,6 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
     compile 'commons-logging:commons-logging:1.1.1'
-
-//    runtime 'org.codehaus.groovy:groovy:1.8.6'
-//    runtime 'commons-logging:commons-logging:1.1.1'
-
     testCompile "junit:junit:4.11"
     testCompile 'commons-io:commons-io:2.4'
 
@@ -52,16 +48,31 @@ jar {
 }
 
 javafx {
+
+    profiles {
+        // not every possible platform override, but ones that have a known impact
+        windows {
+            id = 'c533f663-1efd-489f-b910-4c7ec20c7fd0'
+            category = 'Utilities'
+        }
+
+//        macosx {
+//            id = 'net.java.openjdk.openjfx.Ensemble2'
+//            category = 'public.app-category.developer-tools'
+//        }
+
+    }
+
     appID 'RenamerFX'
-    appName 'RenamerFX'
+    appName 'Thommis Picture Renamer'
     mainClass 'sample.Main'
 
     // deplpy/info attributes
     category = 'demo'
     copyright = 'Copyright (c) 2014 Thomas Bolz'
-    description = '''RenamerFX Application'''
+    description = '''Utility to batch rename directories with pictures'''
     licenseType = '3 clause BSD'
-    vendor = 'ThomasBolz.'
+    vendor = 'Thomas Bolz'
 
     // deploy/preferences attributes
     installSystemWide = true
@@ -69,9 +80,10 @@ javafx {
     shortcut = true
 
     // app icons
-//    icons {
-//        shortcut = ['shortcut-16.png', 'shortcut-32.png', 'shortcut-128.png', 'shortcut-256.png', 'shortcut-16@2x.png', 'shortcut-32@2x.png', 'shortcut-128@2x.png']
-//        volume = 'javafx-icon.png'
-//        setup = 'javafx-icon.png'
-//    }
+    icons {
+        shortcut = ['shortcut-64.png', 'shortcut-128.png', 'shortcut-256.png', 'shortcut-32@2x.png', 'shortcut-32@2x.png', 'shortcut-128@2x.png']
+        volume = 'javafx-icon.png'
+        setup = 'javafx-icon.png'
+    }
+
 }
