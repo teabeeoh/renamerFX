@@ -3,7 +3,7 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
 /*
- * Copyright 2013 Thomas Bolz
+ * Copyright 2014 Thomas Bolz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -80,10 +80,10 @@ javafx {
     shortcut = true
 
     // app icons
-    icons {
-        shortcut = ['shortcut-64.png', 'shortcut-128.png', 'shortcut-256.png', 'shortcut-32@2x.png', 'shortcut-32@2x.png', 'shortcut-128@2x.png']
-        volume = 'javafx-icon.png'
-        setup = 'javafx-icon.png'
-    }
+//    icons {
+//        shortcut = ['shortcut-16.png', 'shortcut-16@2x.png', 'shortcut-32.png', 'shortcut-32@2x.png', 'shortcut-64.png', 'shortcut-64@2x.png', 'shortcut-128.png', 'shortcut-128@2x.png', 'shortcut-256.png', 'shortcut-256@2x.png', 'shortcut-512.png']
+//        volume = 'javafx-icon.png'
+//        setup = 'javafx-icon.png'
+//    }
 
 }
