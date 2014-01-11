@@ -18,8 +18,8 @@ apply plugin: 'groovy'
  *    limitations under the License.
  */
 
-//apply from: "javafx.plugin"
-apply from: "http://dl.bintray.com/content/shemnon/javafx-gradle/0.4.0/javafx.plugin"
+apply from: "javafx.plugin"
+//apply from: "http://dl.bintray.com/content/shemnon/javafx-gradle/0.4.0/javafx.plugin"
 
 sourceCompatibility = 1.7
 version = '0.1'

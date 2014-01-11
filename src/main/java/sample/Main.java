@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Thomas Bolz
+ * Copyright 2014 Thomas Bolz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,8 +30,12 @@ public class Main extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("renamer.fxml"));
         primaryStage.setTitle("RenamerFX");
         primaryStage.setScene(new Scene(root, 1000, 800));
-        primaryStage.getIcons().add(new Image("icon-128.png"));
+        primaryStage.getIcons().add(new Image("icon-16.png"));
+        primaryStage.getIcons().add(new Image("icon-32.png"));
         primaryStage.getIcons().add(new Image("icon-64.png"));
+        primaryStage.getIcons().add(new Image("icon-128.png"));
+        primaryStage.getIcons().add(new Image("icon-256.png"));
+        primaryStage.getIcons().add(new Image("icon-512.png"));
         primaryStage.show();
     }
 

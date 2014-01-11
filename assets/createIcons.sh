@@ -1,5 +1,7 @@
 #!/bin/sh
 alias inkscape='/Applications/Inkscape.app/Contents/Resources/bin/inkscape'
+for x in 16 32 64 128 256 512 ; do inkscape --export-area-drawing --export-png icon-${x}.png -w ${x} logo.svg ; done
+mv *.png ../src/main/resources
 for x in 16 32 64 128 256 512 ; do inkscape --export-area-drawing --export-png shortcut-${x}.png -w ${x} logo.svg ; done
 declare -i w
 for x in 16 32 64 128 256 512;
