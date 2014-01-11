@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Thomas Bolz
+ * Copyright 2014 Thomas Bolz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package de.thomasbolz.renamer;
 
+import javafx.application.Platform;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -37,6 +38,8 @@ public class Renamer {
     private final SortedMap<Path, List<CopyTask>> copyTasks;
     private final static String EXLUSION_REGEX = "\\..*";
     private final List<Path> excludedFiles;
+    private final List<ProgressListener> progressListeners;
+    private double numberOfDirectories;
 
     public SortedMap<Path, List<CopyTask>> getCopyTasks() {
         return copyTasks;
@@ -51,6 +54,7 @@ public class Renamer {
         this.target = target;
         copyTasks = new TreeMap<>();
         excludedFiles = new ArrayList();
+        progressListeners = new ArrayList<>();
     }
 
     public Map<Path, List<CopyTask>> prepareCopyTasks() {
@@ -108,16 +112,31 @@ public class Renamer {
     }
 
     private void generateTargetFilenames() {
+        log.debug("FXThread: " + Platform.isFxApplicationThread());
+        updateDirectoryProgress(0);
+        updateFileProgress(0);
+        int dirCounter = 1;
         for (Path path : copyTasks.keySet()) {
-            int counter = 1;
+            int fileCounter = 1;
+            updateDirectoryProgress(dirCounter / getNumberOfDirectories());
+            updateFileProgress(0);
             for (CopyTask copyTask : copyTasks.get(path)) {
-                String targetFilename = path.getFileName() + "_" + String.format("%02d", counter) + "." + copyTask.getSourceFile().toString().substring(copyTask.getSourceFile().toString().lastIndexOf('.') + 1).toLowerCase();
+                updateFileProgress(fileCounter / ((double) copyTasks.get(path).size()));
+                String targetFilename = path.getFileName() + "_" + String.format("%02d", fileCounter) + "." + copyTask.getSourceFile().toString().substring(copyTask.getSourceFile().toString().lastIndexOf('.') + 1).toLowerCase();
                 copyTask.setTargetFile(target.resolve(source.relativize(Paths.get(path.toString(), targetFilename))));
-                counter++;
+                updateCurrentCopyTask(copyTask);
+                fileCounter++;
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
+            dirCounter++;
         }
 
     }
+
 
     public void executeCopyTasks() {
         log.info("Start executing CopyTasks");
@@ -145,6 +164,10 @@ public class Renamer {
         log.info("Finished executing CopyTasks");
     }
 
+    public double getNumberOfDirectories() {
+        return (double) copyTasks.size();
+    }
+
     private class DefaultFileFilter implements FileFilter {
 
 
@@ -157,4 +180,33 @@ public class Renamer {
             }
         }
     }
+
+    public void addProgressListener(ProgressListener listener) {
+        progressListeners.add(listener);
+    }
+
+    public void removeProgressListener(ProgressListener listener) {
+        progressListeners.remove(listener);
+    }
+
+    private void updateDirectoryProgress(double progress) {
+        for (ProgressListener listener : progressListeners) {
+            listener.directoryProgressChanged(progress);
+        }
+    }
+
+    private void updateFileProgress(double progress) {
+        for (ProgressListener listener : progressListeners) {
+            listener.fileProgressChanged(progress);
+        }
+    }
+
+    private void updateCurrentCopyTask(CopyTask copyTask) {
+        for (ProgressListener listener : progressListeners) {
+            listener.currentCopyTaskChanged(copyTask);
+        }
+//        System.out.println("-->" + copyTask);
+    }
+
+
 }

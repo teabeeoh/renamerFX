@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Thomas Bolz
+ * Copyright 2014 Thomas Bolz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package sample;
 
+import de.thomasbolz.renamer.CopyTask;
+import de.thomasbolz.renamer.ProgressListener;
 import de.thomasbolz.renamer.Renamer;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -31,18 +34,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
 
 
-public class RenamerGUI {
+public class RenamerGUI implements ProgressListener {
 
     Log log = LogFactory.getLog(this.getClass());
 
@@ -142,94 +139,21 @@ public class RenamerGUI {
 
     @FXML
     void rename(ActionEvent event) {
-        Renamer renamer = new Renamer(getSrcDirectory().toPath(), getTargetDirectory().toPath());
-        renamer.prepareCopyTasks();
-        renamer.executeCopyTasks();
-        log.info("Renaming files");
-        txtOut.clear();
-        final Path source = getSrcDirectory().toPath();
-        final Path target = getTargetDirectory().toPath();
-        log.info("source path: " + source);
-        log.info("target path: " + target);
-        final Map<String, Integer> counters = new HashMap<String, Integer>();
-        try {
-            Files.walkFileTree(source, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE,
-                    new SimpleFileVisitor<Path>() {
-
-                        String currentDirectoryName = "";
-                        String fileNamePattern = "";
-
-                        /**
-                         * If we find a directory create/copy it and add a counter
-                         *
-                         * @param dir
-                         * @param attrs
-                         * @return
-                         * @throws IOException
-                         */
-                        @Override
-                        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-                                throws IOException {
-                            Path targetdir = target.resolve(source.relativize(dir));
-                            currentDirectoryName = dir.getFileName().toString();
-                            counters.put(currentDirectoryName, new Integer(1));
-                            log.info("**** current directory: " + currentDirectoryName);
-                            try {
-                                Files.copy(dir, targetdir);
-                                String message = "created directory " + targetdir;
-                                log.info(message);
-                                txtOut.appendText(message + "\n");
-                            } catch (FileAlreadyExistsException e) {
-                                if (!dir.equals(source)) {
-                                    String message = "directory " + targetdir + " already exists ";
-                                    log.info(message);
-                                    txtOut.appendText(message + "\n");
-                                }
-                            }
-                            return FileVisitResult.CONTINUE;
-                        }
-
-                        @Override
-                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-                                throws IOException {
-                            try {
-                                currentDirectoryName = file.getParent().getFileName().toString();
-                                Path targetFile;
-                                String filename = currentDirectoryName + "_" + String.format("%02d", counters.get(currentDirectoryName)) + "." + file.toString().substring(file.toString().lastIndexOf('.') + 1).toLowerCase();
-                                counters.put(currentDirectoryName, counters.get(currentDirectoryName) + 1);
-                                log.debug("++ " + filename);
-                                targetFile = target.resolve(source.relativize(Paths.get(file.getParent().toString(), filename)));
-                                Files.copy(file, targetFile);
-                                String message = "copied from " + file + " to " + targetFile;
-                                log.info(message);
-                                txtOut.appendText(message + "\n");
-                            } catch (FileAlreadyExistsException e) {
-                                String message = "file " + file + " already exists";
-                                log.info(message);
-                                txtOut.appendText(message + "\n");
-                            }
-                            return FileVisitResult.CONTINUE;
-                        }
-                    });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-//        if (srcDirectory != null && srcDirectory.isDirectory()) {
-//            walkFileTree(srcDirectory);
-//        }
-
-    }
-
-    private void walkFileTree(File directory) {
-        for (File file : directory.listFiles()) {
-            if (file.isDirectory()) {
-                walkFileTree(file);
-            } else {
-                txtOut.appendText(file.getPath() + "\n");
-                Paths.get(file.toURI());
+        txtOut.setText("");
+        Runnable myTask = new Runnable() {
+            @Override
+            public void run() {
+                Renamer renamer = new Renamer(getSrcDirectory().toPath(), getTargetDirectory().toPath());
+//                Renamer renamer = new Renamer(null, null);
+                renamer.addProgressListener(RenamerGUI.this);
+                renamer.prepareCopyTasks();
             }
+        };
+        final Thread taskRunner = new Thread(myTask);
+//        taskRunner.setName("TaskRunner");
+//        taskRunner.setDaemon(true);
+        taskRunner.start();
 
-        }
     }
 
     @FXML
@@ -300,4 +224,35 @@ public class RenamerGUI {
         return Preferences.userNodeForPackage(getClass());
     }
 
+    @Override
+    public void directoryProgressChanged(final double progress) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                progressDirs.setProgress(progress);
+            }
+        });
+    }
+
+    @Override
+    public void fileProgressChanged(final double progress) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                progressFiles.setProgress(progress);
+            }
+        });
+    }
+
+    @Override
+    public void currentCopyTaskChanged(final CopyTask copyTask) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                String text = txtOut.getText();
+                text += copyTask + "\n";
+                txtOut.setText(text);
+            }
+        });
+    }
 }
