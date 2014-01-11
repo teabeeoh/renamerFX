@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Thomas Bolz
+ * Copyright 2014 Thomas Bolz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.nio.file.Path;
 /**
  * Created by Thomas Bolz on 28.12.13.
  */
-class CopyTask {
+public class CopyTask {
     private Path sourceFile;
     private Path targetFile;
 
