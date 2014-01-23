@@ -14,11 +14,8 @@
  *    limitations under the License.
  */
 
-package sample;
+package de.thomasbolz.renamer;
 
-import de.thomasbolz.renamer.CopyTask;
-import de.thomasbolz.renamer.ProgressListener;
-import de.thomasbolz.renamer.Renamer;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;

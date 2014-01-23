@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package sample;
+package de.thomasbolz.renamer;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -27,7 +27,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("renamer.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/de/thomasbolz/renamer/renamer.fxml"));
         primaryStage.setTitle("RenamerFX");
         primaryStage.setScene(new Scene(root, 1000, 800));
         primaryStage.getIcons().add(new Image("icon-16.png"));
