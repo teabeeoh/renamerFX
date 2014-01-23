@@ -19,7 +19,6 @@ apply plugin: 'groovy'
  */
 
 apply from: "javafx.plugin"
-//apply from: "http://dl.bintray.com/content/shemnon/javafx-gradle/0.4.0/javafx.plugin"
 
 sourceCompatibility = 1.8
 
