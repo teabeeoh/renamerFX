@@ -22,7 +22,12 @@ apply from: "javafx.plugin"
 //apply from: "http://dl.bintray.com/content/shemnon/javafx-gradle/0.4.0/javafx.plugin"
 
 sourceCompatibility = 1.8
-version = '0.1'
+
+def props = new Properties()
+file("src/main/resources/renamer.properties").withInputStream {
+    stream -> props.load(stream)
+}
+version = props.get("app.version")
 idea {
     module {
         downloadJavadoc = true
@@ -64,7 +69,7 @@ javafx {
     }
 
     appID 'RenamerFX'
-    appName 'Thommis Picture Renamer'
+    appName props.get("app.name")
     mainClass 'de.thomasbolz.renamer.Main'
 
     // deplpy/info attributes
