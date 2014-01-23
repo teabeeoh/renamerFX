@@ -20,14 +20,17 @@ import javafx.application.Platform;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
 /**
+ * The Renamer is responsible for all steps in the renaming process:
+ * <ol>
+ * <li>{@link #prepareCopyTasks()} analyzes the source and target directories and creates a list of {@link de.thomasbolz.renamer.CopyTask}s</li>
+ * <li>{@link #executeCopyTasks()} executes the list of CopyTasks file by file and directory by directory.</li>
+ * </ol>
  * Created by Thomas Bolz on 28.12.13.
  */
 public class Renamer {
@@ -41,14 +44,26 @@ public class Renamer {
     private final List<ProgressListener> progressListeners;
     private double numberOfDirectories;
 
+    /**
+     * @return a list of all CopyTask that were found during the analysis.
+     */
     public SortedMap<Path, List<CopyTask>> getCopyTasks() {
         return copyTasks;
     }
 
+    /**
+     * @return a list of all files or directories that were excluded during the analysis.
+     */
     public List<Path> getExcludedFiles() {
         return excludedFiles;
     }
 
+    /**
+     * Creates a new Renamer.
+     *
+     * @param source directory from which the files shall be copied
+     * @param target directory to which the files shall be copied
+     */
     public Renamer(Path source, Path target) {
         this.source = source;
         this.target = target;
@@ -57,6 +72,12 @@ public class Renamer {
         progressListeners = new ArrayList<>();
     }
 
+    /**
+     * Step 1 of the renaming process:
+     * Analysis steps in the renaming process. Walks the whole file tree of the source directory and creates a CopyTask
+     * for each file or directory that is found and does not match the exclusion list.
+     * @return a list of all CopyTasks
+     */
     public Map<Path, List<CopyTask>> prepareCopyTasks() {
 
 
@@ -99,6 +120,10 @@ public class Renamer {
         return copyTasks;
     }
 
+    /**
+     * Sorts all CopyTasks in alphabetical order. This step must be done, as {@link java.nio.file.Files#walkFileTree(java.nio.file.Path, java.nio.file.FileVisitor)}
+     * does not walk the file tree in any deterministic order.
+     */
     private void sortCopyTasks() {
         for (Path path : copyTasks.keySet()) {
             final List<CopyTask> copyTasks = this.copyTasks.get(path);
@@ -111,6 +136,9 @@ public class Renamer {
         }
     }
 
+    /**
+     * The target file names are the name of the parent directory with an index number suffix.
+     */
     private void generateTargetFilenames() {
         log.debug("FXThread: " + Platform.isFxApplicationThread());
         updateDirectoryProgress(0);
@@ -138,6 +166,10 @@ public class Renamer {
     }
 
 
+    /**
+     * Step 2 of the renaming process:
+     * Executes the list of CopyTasks.
+     */
     public void executeCopyTasks() {
         log.info("Start executing CopyTasks");
         for (Path dir : copyTasks.keySet()) {
@@ -164,48 +196,71 @@ public class Renamer {
         log.info("Finished executing CopyTasks");
     }
 
+    /**
+     * Returns the total number of directories, that were found during step 1.
+     * @return
+     */
     public double getNumberOfDirectories() {
         return (double) copyTasks.size();
     }
 
-    private class DefaultFileFilter implements FileFilter {
+//    private class DefaultFileFilter implements FileFilter {
+//
+//
+//        @Override
+//        public boolean accept(File file) {
+//            if (file != null && !file.getName().matches(EXLUSION_REGEX)) {
+//                return true;
+//            } else {
+//                return false;
+//            }
+//        }
+//    }
 
-
-        @Override
-        public boolean accept(File file) {
-            if (file != null && !file.getName().matches(EXLUSION_REGEX)) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }
-
+    /**
+     * Adds a ProgressListener to this Renamer. All ProgressListeners are notified on the progress during the execution tasks.
+     * @param listener
+     */
     public void addProgressListener(ProgressListener listener) {
         progressListeners.add(listener);
     }
 
+    /**
+     * Removes a ProgressListener from this Renamer.
+     * @param listener
+     */
     public void removeProgressListener(ProgressListener listener) {
         progressListeners.remove(listener);
     }
 
+    /**
+     * Notify all ProgressListeners about the directory progress.
+     * @param progress
+     */
     private void updateDirectoryProgress(double progress) {
         for (ProgressListener listener : progressListeners) {
             listener.directoryProgressChanged(progress);
         }
     }
 
+    /**
+     * Notify all ProgressListeners about the file progress.
+     * @param progress
+     */
     private void updateFileProgress(double progress) {
         for (ProgressListener listener : progressListeners) {
             listener.fileProgressChanged(progress);
         }
     }
 
+    /**
+     * Notify all ProgressListeners about hte current CopyTask.
+     * @param copyTask
+     */
     private void updateCurrentCopyTask(CopyTask copyTask) {
         for (ProgressListener listener : progressListeners) {
             listener.currentCopyTaskChanged(copyTask);
         }
-//        System.out.println("-->" + copyTask);
     }
 
 
