@@ -19,6 +19,7 @@ package de.thomasbolz.renamer;
 import java.nio.file.Path;
 
 /**
+ * A CopyTask contains the information for a single copy operation (either for a file or a directory).
  * Created by Thomas Bolz on 28.12.13.
  */
 public class CopyTask {
@@ -48,5 +49,14 @@ public class CopyTask {
                 "sourceFile=" + sourceFile +
                 " -> targetFile=" + targetFile +
                 '}';
+    }
+
+    /**
+     * Returns a formatted string that documents this CopyTask.
+     *
+     * @return
+     */
+    public String toFormattedString() {
+        return sourceFile + "\t-->\t" + targetFile;
     }
 }

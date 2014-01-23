@@ -266,9 +266,10 @@ public class RenamerGUI implements ProgressListener {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                String text = txtOut.getText();
-                text += copyTask + "\n";
-                txtOut.setText(text);
+//                String text = txtOut.getText();
+//                text += copyTask + "\n";
+//                txtOut.setText(text);
+                txtOut.appendText(copyTask.toFormattedString() + "\n");
             }
         });
     }

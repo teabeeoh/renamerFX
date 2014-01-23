@@ -24,23 +24,23 @@ public interface ProgressListener {
 
     /**
      * Fired for each file of a directory.
-     * File progress goes for each directory from 0.0 to 1.0
      *
-     * @param progress
+     *
+     * @param progress File progress goes for each directory from 0.0 to 1.0
      */
     public void fileProgressChanged(double progress);
 
     /**
-     * Fired for each directory found. Directory progress can be between 0.0 and 1.0
+     * Fired for each directory found.
      *
-     * @param progress
+     * @param progress Directory progress can be between 0.0 and 1.0
      */
     public void directoryProgressChanged(double progress);
 
     /**
      * Fired for each {@link de.thomasbolz.renamer.CopyTask}
      *
-     * @param copyTask
+     * @param copyTask the current CopyTask
      */
     public void currentCopyTaskChanged(CopyTask copyTask);
 
