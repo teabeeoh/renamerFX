@@ -29,6 +29,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+/**
+ * Main class. Loads the main gui and starts the FX application.
+ */
 public class Main extends Application {
 
     private Log log = LogFactory.getLog(this.getClass());
@@ -53,6 +56,12 @@ public class Main extends Application {
         launch(args);
     }
 
+    /**
+     * Reads properties from a property file that is on the classpath.
+     *
+     * @param filename
+     * @return
+     */
     private Properties readPropertiesFromClasspath(String filename) {
         Properties props = new Properties();
         InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(filename);
