@@ -22,13 +22,22 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 public class Main extends Application {
+
+    private Log log = LogFactory.getLog(this.getClass());
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/de/thomasbolz/renamer/renamer.fxml"));
-        primaryStage.setTitle("RenamerFX");
+        final Properties properties = readPropertiesFromClasspath("renamer.properties");
+        primaryStage.setTitle(properties.getProperty("app.name", "app.name") + " v" + properties.getProperty("app.version", "app.version"));
         primaryStage.setScene(new Scene(root, 1000, 800));
         primaryStage.getIcons().add(new Image("icon-16.png"));
         primaryStage.getIcons().add(new Image("icon-32.png"));
@@ -43,4 +52,23 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+
+    private Properties readPropertiesFromClasspath(String filename) {
+        Properties props = new Properties();
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(filename);
+
+
+        try {
+            if (inputStream != null) {
+                props.load(inputStream);
+            } else {
+                log.info("did not find file " + filename);
+            }
+        } catch (IOException e) {
+            log.error("IOException while reading properties from file " + filename, e);
+        }
+
+        return props;
+    }
+
 }
