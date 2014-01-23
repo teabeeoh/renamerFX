@@ -31,11 +31,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
-import java.net.URL;
-import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
 
-
+/**
+ * Controller for the main GUI. The GUI is defined in renamer.fxml.
+ */
 public class RenamerGUI implements ProgressListener {
 
     Log log = LogFactory.getLog(this.getClass());
@@ -43,6 +43,9 @@ public class RenamerGUI implements ProgressListener {
     public static final String SRC_DIR = "srcDir";
     private static final String TARGET_DIR = "targetDir";
 
+    /**
+     * Contains the source directory of the renaming operation.
+     */
     private SimpleObjectProperty<File> srcDirectory = new SimpleObjectProperty<File>(null);
 
     public File getSrcDirectory() {
@@ -57,6 +60,9 @@ public class RenamerGUI implements ProgressListener {
         return srcDirectory;
     }
 
+    /**
+     * Contains the target directory of the renaming operation.
+     */
     private SimpleObjectProperty<File> targetDirectory = new SimpleObjectProperty<File>(null);
 
     public File getTargetDirectory() {
@@ -72,12 +78,6 @@ public class RenamerGUI implements ProgressListener {
     }
 
     @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
-
-    @FXML
     private Button btnSource;
 
     @FXML
@@ -85,12 +85,6 @@ public class RenamerGUI implements ProgressListener {
 
     @FXML
     private Button btnRename;
-
-    @FXML
-    private Label lblDirs;
-
-    @FXML
-    private Label lblFiles;
 
     @FXML
     private Label lblSource;
@@ -108,19 +102,11 @@ public class RenamerGUI implements ProgressListener {
     private TextArea txtOut;
 
 
-    @FXML
-    void changeSrc(ActionEvent event) {
-        DirectoryChooser f = new DirectoryChooser();
-
-        if (getSrcDirectory().isDirectory()) {
-            f.setInitialDirectory(getSrcDirectory());
-        }
-        File file = f.showDialog(txtOut.getScene().getWindow());
-        if (file != null && file.isDirectory()) {
-            setSrcDirectory(file);
-        }
-    }
-
+    /**
+     * Action handler for the target directory button.
+     *
+     * @param event
+     */
     @FXML
     void changeTarget(ActionEvent event) {
         DirectoryChooser chooser = new DirectoryChooser();
@@ -134,14 +120,34 @@ public class RenamerGUI implements ProgressListener {
         }
     }
 
+    /**
+     * Action handler for the source directory button.
+     * @param event
+     */
+    @FXML
+    void changeSrc(ActionEvent event) {
+        DirectoryChooser f = new DirectoryChooser();
+
+        if (getSrcDirectory().isDirectory()) {
+            f.setInitialDirectory(getSrcDirectory());
+        }
+        File file = f.showDialog(txtOut.getScene().getWindow());
+        if (file != null && file.isDirectory()) {
+            setSrcDirectory(file);
+        }
+    }
+
+    /**
+     * Action handler for the rename button
+     * @param event
+     */
     @FXML
     void rename(ActionEvent event) {
-        txtOut.setText("");
+        txtOut.clear();
         Runnable myTask = new Runnable() {
             @Override
             public void run() {
                 Renamer renamer = new Renamer(getSrcDirectory().toPath(), getTargetDirectory().toPath());
-//                Renamer renamer = new Renamer(null, null);
                 renamer.addProgressListener(RenamerGUI.this);
                 renamer.prepareCopyTasks();
             }
@@ -157,8 +163,6 @@ public class RenamerGUI implements ProgressListener {
     void initialize() {
         assert btnSource != null : "fx:id=\"btnSource\" was not injected: check your FXML file 'renamer.fxml'.";
         assert btnTarget != null : "fx:id=\"btnTarget\" was not injected: check your FXML file 'renamer.fxml'.";
-        assert lblDirs != null : "fx:id=\"lblDirs\" was not injected: check your FXML file 'renamer.fxml'.";
-        assert lblFiles != null : "fx:id=\"lblFiles\" was not injected: check your FXML file 'renamer.fxml'.";
         assert lblSource != null : "fx:id=\"lblSource\" was not injected: check your FXML file 'renamer.fxml'.";
         assert lblTarget != null : "fx:id=\"lblTarget\" was not injected: check your FXML file 'renamer.fxml'.";
         assert progressDirs != null : "fx:id=\"progressDirs\" was not injected: check your FXML file 'renamer.fxml'.";
@@ -169,50 +173,66 @@ public class RenamerGUI implements ProgressListener {
     }
 
     private void initFromPrefs() {
-        setSrcDirectory(new File(getSourceDirectoryToPrefs()));
-        setTargetDirectory(new File(getTargetDirectoryToPrefs()));
+        setSrcDirectory(new File(getSourceDirectoryFromPrefs()));
+        setTargetDirectory(new File(getTargetDirectoryFromPrefs()));
 
     }
 
+    /**
+     * Initialize the property bindings.
+     */
     private void initBindings() {
+
+        // reflect changes of srcDirectory in the GUI and store the new source dir to the preferences
         srcDirectory.addListener(new ChangeListener<File>() {
             @Override
             public void changed(ObservableValue<? extends File> observableValue, File oldFile, File newFile) {
                 if (newFile != null && newFile.isDirectory()) {
                     String path = newFile.getAbsolutePath();
                     lblSource.setText(path);
-                    setSourceDirectoryFromPrefs(path);
+                    setSourceDirectoryToPrefs(path);
                 }
             }
         });
+        // reflect changes of targetDirectory in the GUI and store the new target dir to the preferences
         targetDirectory.addListener(new ChangeListener<File>() {
             @Override
             public void changed(ObservableValue<? extends File> observableValue, File oldFile, File newFile) {
                 if (newFile != null && newFile.isDirectory()) {
                     String path = newFile.getAbsolutePath();
                     lblTarget.setText(path);
-                    setTargetDirectoryFromPrefs(path);
+                    setTargetDirectoryToPrefs(path);
                 }
             }
         });
     }
 
-    private void setSourceDirectoryFromPrefs(String path) {
+    private void setSourceDirectoryToPrefs(String path) {
         final Preferences preferences = getPreferences();
         preferences.put(SRC_DIR, path);
     }
 
-    private String getSourceDirectoryToPrefs() {
+    /**
+     * Retrieves the source directory from the preferences, if not available use the user's home directory
+     *
+     * @return
+     */
+    private String getSourceDirectoryFromPrefs() {
         final Preferences preferences = getPreferences();
         return preferences.get(SRC_DIR, System.getProperty("user.home"));
     }
 
-    private void setTargetDirectoryFromPrefs(String path) {
+    private void setTargetDirectoryToPrefs(String path) {
         final Preferences preferences = getPreferences();
         preferences.put(TARGET_DIR, path);
     }
 
-    private String getTargetDirectoryToPrefs() {
+    /**
+     * Retrieves the target directory from the preferences, if not available use the user's home directory
+     *
+     * @return
+     */
+    private String getTargetDirectoryFromPrefs() {
         final Preferences preferences = getPreferences();
         return preferences.get(TARGET_DIR, System.getProperty("user.home"));
     }

@@ -17,14 +17,31 @@
 package de.thomasbolz.renamer;
 
 /**
+ * Monitors the progress of the renaming process.
  * Created by Thomas Bolz on 30.12.13.
  */
 public interface ProgressListener {
 
-    public void directoryProgressChanged(double progress);
-
+    /**
+     * Fired for each file of a directory.
+     * File progress goes for each directory from 0.0 to 1.0
+     *
+     * @param progress
+     */
     public void fileProgressChanged(double progress);
 
+    /**
+     * Fired for each directory found. Directory progress can be between 0.0 and 1.0
+     *
+     * @param progress
+     */
+    public void directoryProgressChanged(double progress);
+
+    /**
+     * Fired for each {@link de.thomasbolz.renamer.CopyTask}
+     *
+     * @param copyTask
+     */
     public void currentCopyTaskChanged(CopyTask copyTask);
 
 }
