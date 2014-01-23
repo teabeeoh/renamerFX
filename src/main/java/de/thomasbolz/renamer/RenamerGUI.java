@@ -31,6 +31,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.SortedMap;
 import java.util.prefs.Preferences;
 
 /**
@@ -122,6 +125,7 @@ public class RenamerGUI implements ProgressListener {
 
     /**
      * Action handler for the source directory button.
+     *
      * @param event
      */
     @FXML
@@ -139,6 +143,7 @@ public class RenamerGUI implements ProgressListener {
 
     /**
      * Action handler for the rename button
+     *
      * @param event
      */
     @FXML
@@ -150,6 +155,22 @@ public class RenamerGUI implements ProgressListener {
                 Renamer renamer = new Renamer(getSrcDirectory().toPath(), getTargetDirectory().toPath());
                 renamer.addProgressListener(RenamerGUI.this);
                 renamer.prepareCopyTasks();
+                final SortedMap<Path, List<CopyTask>> copyTasks = renamer.getCopyTasks();
+                StringBuilder sb = new StringBuilder();
+                copyTasks.forEach((path, tasks) -> {
+                    sb.append(path);
+                    sb.append("\n");
+                    tasks.forEach(task -> {
+                        sb.append(task.toFormattedString());
+                        sb.append("\n");
+                    });
+                });
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        txtOut.setText(sb.toString());
+                    }
+                });
             }
         };
         final Thread taskRunner = new Thread(myTask);
@@ -263,14 +284,11 @@ public class RenamerGUI implements ProgressListener {
 
     @Override
     public void currentCopyTaskChanged(final CopyTask copyTask) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-//                String text = txtOut.getText();
-//                text += copyTask + "\n";
-//                txtOut.setText(text);
-                txtOut.appendText(copyTask.toFormattedString() + "\n");
-            }
-        });
+//        Platform.runLater(new Runnable() {
+//            @Override
+//            public void run() {
+//                txtOut.appendText(copyTask.toFormattedString() + "\n");
+//            }
+//        });
     }
 }
