@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+
 <!--
   ~ Copyright 2014 Thomas Bolz
   ~
@@ -17,20 +16,24 @@
   ~    limitations under the License.
   -->
 
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
             prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1"
             xmlns="http://javafx.com/javafx/2.2" fx:controller="de.thomasbolz.renamer.RenamerGUI">
-<children>
+    <children>
         <GridPane id="GridPane" hgap="10.0" maxWidth="1.7976931348623157E308" minWidth="-Infinity" vgap="10.0"
                   AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0"
                   AnchorPane.topAnchor="14.0">
             <children>
-                <Button fx:id="btnSource" mnemonicParsing="false" onAction="#changeSrc" prefWidth="122.0"
-                        text="src Directory" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <Button fx:id="btnSource" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                        onAction="#changeSrc" prefWidth="-1.0" text="Source Directory" GridPane.columnIndex="0"
+                        GridPane.hgrow="NEVER" GridPane.rowIndex="0"/>
                 <Label fx:id="lblSource" maxWidth="1.7976931348623157E308" prefWidth="-1.0" text="Label"
                        GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0"/>
-                <Button fx:id="btnTarget" mnemonicParsing="false" onAction="#changeTarget" text="target Directory"
-                        GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <Button fx:id="btnTarget" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                        onAction="#changeTarget" text="Target Directory" GridPane.columnIndex="0" GridPane.hgrow="NEVER"
+                        GridPane.rowIndex="1"/>
                 <Label fx:id="lblTarget" maxWidth="1.7976931348623157E308" prefWidth="-1.0" text="Label"
                        GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1"/>
                 <Label fx:id="lblDirs" maxHeight="-Infinity" maxWidth="-Infinity" prefWidth="122.0" text="Directories:"
@@ -48,7 +51,7 @@
                           GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.rowIndex="5"/>
             </children>
             <columnConstraints>
-                <ColumnConstraints hgrow="NEVER" maxWidth="1.7976931348623157E308" minWidth="-Infinity"/>
+                <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity"/>
                 <ColumnConstraints hgrow="ALWAYS" minWidth="10.0"/>
             </columnConstraints>
             <rowConstraints>
