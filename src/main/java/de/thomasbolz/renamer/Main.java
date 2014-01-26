@@ -47,7 +47,6 @@ public class Main extends Application {
         primaryStage.getIcons().add(new Image("icon-64.png"));
         primaryStage.getIcons().add(new Image("icon-128.png"));
         primaryStage.getIcons().add(new Image("icon-256.png"));
-        primaryStage.getIcons().add(new Image("icon-512.png"));
         primaryStage.show();
     }
 
