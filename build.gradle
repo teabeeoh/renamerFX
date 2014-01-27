@@ -88,7 +88,7 @@ javafx {
     // app icons
     icons {
         shortcut = ['shortcut-16.png', 'shortcut-16@2x.png', 'shortcut-32.png', 'shortcut-32@2x.png', 'shortcut-64.png', 'shortcut-64@2x.png', 'shortcut-128.png', 'shortcut-128@2x.png', 'shortcut-256.png', 'shortcut-256@2x.png']
-        volume = 'javafx-icon.png'
+        volume = ['volume-16.png', 'volume-16@2x.png', 'volume-32.png', 'volume-32@2x.png', 'volume-64.png', 'volume-64@2x.png', 'volume-128.png', 'volume-128@2x.png', 'volume-256.png', 'volume-256@2x.png']
         setup = 'setup.png'
     }
 
