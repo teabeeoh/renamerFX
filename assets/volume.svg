@@ -15,9 +15,34 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.1 "
-   sodipodi:docname="logo.svg">
+   sodipodi:docname="volume.svg">
   <defs
      id="defs4">
+    <inkscape:path-effect
+       effect="skeletal"
+       id="path-effect3989"
+       is_visible="true"
+       pattern="M 0,5 C 0,2.24 2.24,0 5,0 7.76,0 10,2.24 10,5 10,7.76 7.76,10 5,10 2.24,10 0,7.76 0,5 z"
+       copytype="single_stretched"
+       prop_scale="1"
+       scale_y_rel="false"
+       spacing="0"
+       normal_offset="0"
+       tang_offset="0"
+       prop_units="false"
+       vertical_pattern="false"
+       fuse_tolerance="0" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect3985"
+       is_visible="true" />
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="-16.469044 : 315.15418 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="1038.8875 : 291.19921 : 1"
+       inkscape:persp3d-origin="512.70642 : 167.18346 : 1"
+       id="perspective3064" />
     <linearGradient
        id="linearGradient5185">
       <stop
@@ -359,9 +384,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.66791976"
-     inkscape:cx="-28.602818"
-     inkscape:cy="136.85681"
+     inkscape:zoom="1.8891624"
+     inkscape:cx="10.912128"
+     inkscape:cy="19.869718"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -485,5 +510,40 @@
        id="path5203"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="sssss" />
+    <g
+       id="g3190">
+      <path
+         sodipodi:nodetypes="sssssssss"
+         inkscape:connector-curvature="0"
+         id="rect3162"
+         d="m 92.199211,1200.9476 219.841769,0 c 10.85047,0 19.58569,8.7353 19.58569,19.5857 l 0,36.8211 c 0,10.8505 -8.73522,19.5857 -19.58569,19.5857 l -219.841769,0 c -10.850474,0 -19.585693,-8.7352 -19.585693,-19.5857 l 0,-36.8211 c 0,-10.8504 8.735219,-19.5857 19.585693,-19.5857 z"
+         style="fill:#b3b3b3;fill-opacity:1;stroke:#727272;stroke-width:1.80842972;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1" />
+    </g>
+    <path
+       id="path3196"
+       transform="translate(0,308.26771)"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 280.81228,780.61861 47.90483,120.95307 M 75.694923,903.55669 122.27641,782.80017 m 11.17107,-7.23998 137.34523,0 c 6.77878,0 12.23608,5.4573 12.23608,12.2361 l 0,23.0038 c 0,6.7788 -5.4573,12.2361 -12.23608,12.2361 l -137.34523,0 c -6.77879,0 -12.23608,-5.4573 -12.23608,-12.2361 l 0,-23.0038 c 0,-6.7788 5.45729,-12.2361 12.23608,-12.2361 z" />
+    <path
+       style="fill:#f3f3f3;fill-opacity:1;stroke:#000000;stroke-width:2.04466844;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 126.91065,991.76671 -31.49544,110.92979 184.22821,-0.5293 c 0,-38.079 -4.76402,-110.40049 -4.76402,-110.40049 -12.06123,-23.10457 -147.60693,-26.0059 -147.96875,0 z"
+       id="rect3208"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
+    <rect
+       style="fill:#f3f3f3;fill-opacity:1;stroke:#000000;stroke-width:1.76066256;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect3981"
+       width="216.71765"
+       height="57.14447"
+       x="92.536201"
+       y="1100.395"
+       ry="10.442644" />
+    <path
+       style="fill:#f3f3f3;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1"
+       d="m 5.1492929,653.31354 61.6909901,0 c 5.785225,0 9.49545,4.73549 10.442645,10.44264 l 9.7927,64.07301 -100.044339,-0.794 7.6753598,-63.27901 c 0.6966065,-5.74313 4.6574193,-10.44264 10.4426441,-10.44264 z"
+       id="rect3991"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="sssccss"
+       transform="translate(0,308.26771)" />
   </g>
 </svg>

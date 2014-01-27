@@ -89,7 +89,7 @@ javafx {
     icons {
         shortcut = ['shortcut-16.png', 'shortcut-16@2x.png', 'shortcut-32.png', 'shortcut-32@2x.png', 'shortcut-64.png', 'shortcut-64@2x.png', 'shortcut-128.png', 'shortcut-128@2x.png', 'shortcut-256.png', 'shortcut-256@2x.png']
         volume = 'javafx-icon.png'
-        setup = 'shortcut-64.png'
+        setup = 'setup.png'
     }
 
 //    icons {
