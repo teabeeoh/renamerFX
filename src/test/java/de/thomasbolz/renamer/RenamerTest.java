@@ -71,10 +71,9 @@ public class RenamerTest {
                 log.debug(copyTask);
             }
         }
-        log.debug(pathListMap);
-        renamer.executeCopyTasks();
-
-        log.debug(renamer.getExcludedFiles());
+//        log.debug(pathListMap);
+//
+//        log.debug(renamer.getExcludedFiles());
         Assert.assertEquals(3, renamer.getExcludedFiles().size());
         for (Path path : renamer.getExcludedFiles()) {
             Assert.assertTrue(isExcludedFile(path.toString()));
@@ -85,4 +84,28 @@ public class RenamerTest {
     private boolean isExcludedFile(String s) {
         return s.contains(".file1.txt") || s.contains("Thumbs.db") || s.contains(".DS_Store");
     }
+
+    @Test
+    public void testExcecuteCopyTasks() throws Exception {
+
+        log.debug("\n*** testExcecuteCopyTasks ***\n");
+        Renamer renamer = new Renamer(source, target);
+        final Map<Path, List<CopyTask>> pathListMap = renamer.prepareCopyTasks();
+        renamer.executeCopyTasks();
+
+        log.debug(renamer.getExcludedFiles());
+        final File[] files = Paths.get(new File(".").getCanonicalPath(), "target", "dir1", "subdir").toFile().listFiles();
+
+        Assert.assertEquals(7, files.length);
+        for (File file : files) {
+            Assert.assertTrue(isIncludedFile(file.toString()));
+        }
+
+    }
+
+    private boolean isIncludedFile(String s) {
+        log.debug("filename=" + s);
+        return s.contains("subdir_01.txt") || s.contains("subdir_02.txt") || s.contains("subdir_03.avi") || s.contains("subdir_04.jpeg") || s.contains("subdir_05.jpg") || s.contains("subdir_06.mov") || s.contains("subdir_07.png");
+    }
+
 }
