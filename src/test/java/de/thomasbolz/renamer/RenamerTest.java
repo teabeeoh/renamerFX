@@ -20,6 +20,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,9 +31,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by Thomas Bolz on 28.12.13.
- */
 public class RenamerTest {
 
     private Log log = LogFactory.getLog(this.getClass());
@@ -75,7 +73,16 @@ public class RenamerTest {
         }
         log.debug(pathListMap);
         renamer.executeCopyTasks();
-        log.debug(renamer.getExcludedFiles());
 
+        log.debug(renamer.getExcludedFiles());
+        Assert.assertEquals(3, renamer.getExcludedFiles().size());
+        for (Path path : renamer.getExcludedFiles()) {
+            Assert.assertTrue(isExcludedFile(path.toString()));
+        }
+
+    }
+
+    private boolean isExcludedFile(String s) {
+        return s.contains(".file1.txt") || s.contains("Thumbs.db") || s.contains(".DS_Store");
     }
 }

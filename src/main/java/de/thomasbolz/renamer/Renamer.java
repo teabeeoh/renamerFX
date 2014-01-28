@@ -39,7 +39,8 @@ public class Renamer {
     private final Path source;
     private final Path target;
     private final SortedMap<Path, List<CopyTask>> copyTasks;
-    private final static String EXLUSION_REGEX = "\\..*";
+    private final static String EXLUSION_REGEX = "\\..*|thumbs.db|.*\\.ini|\\.ds.*";
+    private final static String INCLUSION_LIST = ".*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.mov|.*\\.avi|";
     private final List<Path> excludedFiles;
     private final List<ProgressListener> progressListeners;
     private double numberOfDirectories;
@@ -104,7 +105,7 @@ public class Renamer {
                         @Override
                         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                                 throws IOException {
-                            if (!file.getFileName().toString().matches(EXLUSION_REGEX)) {
+                            if (!file.getFileName().toString().toLowerCase().matches(EXLUSION_REGEX)) {
                                 copyTasks.get(file.getParent()).add(new CopyTask(file, null));
                             } else {
                                 excludedFiles.add(file);
