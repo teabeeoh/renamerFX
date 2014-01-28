@@ -17,6 +17,9 @@
 package de.thomasbolz.renamer;
 
 import javafx.application.Platform;
+import javafx.beans.binding.When;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -29,6 +32,9 @@ import javafx.scene.control.TextArea;
 import javafx.stage.DirectoryChooser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.controlsfx.control.action.Action;
+import org.controlsfx.dialog.Dialog;
+import org.controlsfx.dialog.Dialogs;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -50,6 +56,7 @@ public class RenamerGUI implements ProgressListener {
      * Contains the source directory of the renaming operation.
      */
     private SimpleObjectProperty<File> srcDirectory = new SimpleObjectProperty<File>(null);
+    private Renamer renamer;
 
     public File getSrcDirectory() {
         return srcDirectory.get();
@@ -78,6 +85,23 @@ public class RenamerGUI implements ProgressListener {
 
     public SimpleObjectProperty<File> targetDirectory() {
         return targetDirectory;
+    }
+
+    /**
+     * Flag indicating if we are in simulation mode (Renamer only shows what would happen) or not (Renamer actually executes the renaming).
+     */
+    private BooleanProperty simulationMode = new SimpleBooleanProperty(true);
+
+    public Boolean isSimulationMode() {
+        return simulationMode.get();
+    }
+
+    public void setSimulationMode(Boolean value) {
+        simulationMode.setValue(value);
+    }
+
+    public BooleanProperty simulationMode() {
+        return simulationMode;
     }
 
     @FXML
@@ -148,35 +172,56 @@ public class RenamerGUI implements ProgressListener {
      */
     @FXML
     void rename(ActionEvent event) {
-        txtOut.clear();
-        Runnable myTask = new Runnable() {
-            @Override
-            public void run() {
-                Renamer renamer = new Renamer(getSrcDirectory().toPath(), getTargetDirectory().toPath());
-                renamer.addProgressListener(RenamerGUI.this);
-                renamer.prepareCopyTasks();
-                final SortedMap<Path, List<CopyTask>> copyTasks = renamer.getCopyTasks();
-                StringBuilder sb = new StringBuilder();
-                copyTasks.forEach((path, tasks) -> {
-                    sb.append(path);
-                    sb.append("\n");
-                    tasks.forEach(task -> {
-                        sb.append(task.toFormattedString());
+
+        if (isSimulationMode()) {
+            txtOut.clear();
+            Runnable myTask = new Runnable() {
+                @Override
+                public void run() {
+                    renamer = new Renamer(getSrcDirectory().toPath(), getTargetDirectory().toPath());
+                    renamer.addProgressListener(RenamerGUI.this);
+                    renamer.prepareCopyTasks();
+                    final SortedMap<Path, List<CopyTask>> copyTasks = renamer.getCopyTasks();
+                    StringBuilder sb = new StringBuilder();
+                    copyTasks.forEach((path, tasks) -> {
+                        sb.append(path);
                         sb.append("\n");
+                        tasks.forEach(task -> {
+                            sb.append(task.toFormattedString());
+                            sb.append("\n");
+                        });
                     });
-                });
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        txtOut.setText(sb.toString());
-                    }
-                });
-            }
-        };
-        final Thread taskRunner = new Thread(myTask);
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            txtOut.setText(sb.toString());
+                        }
+                    });
+                }
+            };
+            final Thread taskRunner = new Thread(myTask);
 //        taskRunner.setName("TaskRunner");
 //        taskRunner.setDaemon(true);
-        taskRunner.start();
+            taskRunner.start();
+            setSimulationMode(false);
+            return;
+        } else {
+            Action confirm = Dialogs.create()
+                    .title("Confirm renaming")
+                    .masthead("Do you want to execute the renaming?")
+                    .message("The author of this software is not liable for any damage that might occur to your files.")
+                    .showConfirm();
+
+            if (confirm == Dialog.Actions.YES) {
+                txtOut.clear();
+                renamer.executeCopyTasks();
+            } else {
+                log.debug("not confirmed");
+            }
+            setSimulationMode(true);
+            return;
+        }
+
 
     }
 
@@ -189,6 +234,7 @@ public class RenamerGUI implements ProgressListener {
         assert progressDirs != null : "fx:id=\"progressDirs\" was not injected: check your FXML file 'renamer.fxml'.";
         assert progressFiles != null : "fx:id=\"progressFiles\" was not injected: check your FXML file 'renamer.fxml'.";
         assert txtOut != null : "fx:id=\"txtOut\" was not injected: check your FXML file 'renamer.fxml'.";
+        setSimulationMode(true);
         initBindings();
         initFromPrefs();
     }
@@ -226,6 +272,7 @@ public class RenamerGUI implements ProgressListener {
                 }
             }
         });
+        btnRename.textProperty().bind(new When(simulationMode).then("Simulate renaming").otherwise("Execute renaming"));
     }
 
     private void setSourceDirectoryToPrefs(String path) {
@@ -284,11 +331,11 @@ public class RenamerGUI implements ProgressListener {
 
     @Override
     public void currentCopyTaskChanged(final CopyTask copyTask) {
-//        Platform.runLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                txtOut.appendText(copyTask.toFormattedString() + "\n");
-//            }
-//        });
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                txtOut.appendText(copyTask.toFormattedString() + "\n");
+            }
+        });
     }
 }

@@ -153,7 +153,6 @@ public class Renamer {
                 updateFileProgress(fileCounter / ((double) copyTasks.get(path).size()));
                 String targetFilename = path.getFileName() + "_" + String.format("%02d", fileCounter) + "." + copyTask.getSourceFile().toString().substring(copyTask.getSourceFile().toString().lastIndexOf('.') + 1).toLowerCase();
                 copyTask.setTargetFile(target.resolve(source.relativize(Paths.get(path.toString(), targetFilename))));
-                updateCurrentCopyTask(copyTask);
                 fileCounter++;
                 try {
                     Thread.sleep(10);
@@ -186,9 +185,10 @@ public class Renamer {
             }
             for (CopyTask task : copyTasks.get(dir)) {
                 try {
+                    updateCurrentCopyTask(task);
                     Files.copy(task.getSourceFile(), task.getTargetFile());
                 } catch (FileAlreadyExistsException e) {
-                    log.error("File already exists " + task.getTargetFile(), e);
+                    log.info("File already exists " + task.getTargetFile());
                 } catch (IOException e) {
                     log.error("IO Exception while trying to execute CopyTask " + task, e);
                 }
