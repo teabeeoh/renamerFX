@@ -36,7 +36,7 @@ import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialog;
 import org.controlsfx.dialog.Dialogs;
 
-import java.io.File;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.SortedMap;
@@ -49,8 +49,9 @@ public class RenamerGUI implements ProgressListener {
 
     Log log = LogFactory.getLog(this.getClass());
 
-    public static final String SRC_DIR = "srcDir";
+    private static final String SRC_DIR = "srcDir";
     private static final String TARGET_DIR = "targetDir";
+    private static final String DISCLAIMER = "disclaimer";
 
     /**
      * Contains the source directory of the renaming operation.
@@ -114,6 +115,9 @@ public class RenamerGUI implements ProgressListener {
     private Button btnRename;
 
     @FXML
+    private Button btnHelp;
+
+    @FXML
     private Label lblSource;
 
     @FXML
@@ -139,7 +143,7 @@ public class RenamerGUI implements ProgressListener {
         DirectoryChooser chooser = new DirectoryChooser();
 
         if (getTargetDirectory().isDirectory()) {
-            chooser.setInitialDirectory(getSrcDirectory());
+            chooser.setInitialDirectory(getTargetDirectory());
         }
         File file = chooser.showDialog(txtOut.getScene().getWindow());
         if (file != null && file.isDirectory()) {
@@ -166,13 +170,42 @@ public class RenamerGUI implements ProgressListener {
     }
 
     /**
+     * Checks some rules about allowed source and target combinations
+     *
+     * @param source
+     * @param target
+     * @return
+     */
+    private boolean checkDirectories(File source, File target) {
+        if (source == null) {
+            Dialogs.create().lightweight().message("Source directory must be set!").showWarning();
+            return false;
+        } else if (target == null) {
+            Dialogs.create().lightweight().message("Target directory must be set!").showWarning();
+            return false;
+        } else if (source.getAbsolutePath().equals(target.getAbsolutePath())) {
+            Dialogs.create().lightweight().message("Source and target cannot be the same directory!").showWarning();
+            return false;
+        } else if (source.getAbsolutePath().startsWith(target.getAbsolutePath())) {
+            Dialogs.create().lightweight().message("Source directory cannot be subdirectory of target!").showWarning();
+            return false;
+        } else if (target.getAbsolutePath().startsWith(source.getAbsolutePath())) {
+            Dialogs.create().lightweight().message("Target directory cannot be subdirectory of source!").showWarning();
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Action handler for the rename button
      *
      * @param event
      */
     @FXML
     void rename(ActionEvent event) {
-
+        if (checkDirectories(getSrcDirectory(), getTargetDirectory()) == false) {
+            return;
+        }
         if (isSimulationMode()) {
             txtOut.clear();
             Runnable myTask = new Runnable() {
@@ -206,23 +239,28 @@ public class RenamerGUI implements ProgressListener {
             setSimulationMode(false);
             return;
         } else {
-            Action confirm = Dialogs.create()
-                    .title("Confirm renaming")
-                    .masthead("Do you want to execute the renaming?")
-                    .message("The author of this software is not liable for any damage that might occur to your files.")
-                    .showConfirm();
-
-            if (confirm == Dialog.Actions.YES) {
-                txtOut.clear();
-                renamer.executeCopyTasks();
-            } else {
-                log.debug("not confirmed");
-            }
+//            Action confirm = Dialogs.create()
+//                    .title("Confirm renaming")
+//                    .masthead("Do you want to execute the renaming?")
+//                    .message("The author of this software is not liable for any damage that might occur to your files.")
+//                    .showConfirm();
+//
+//            if (confirm == Dialog.Actions.YES) {
+//                txtOut.clear();
+            renamer.executeCopyTasks();
+//            } else {
+//                log.debug("not confirmed");
+//            }
             setSimulationMode(true);
             return;
         }
 
 
+    }
+
+    @FXML
+    void showHelp(ActionEvent event) {
+        initHelp();
     }
 
     @FXML
@@ -237,12 +275,48 @@ public class RenamerGUI implements ProgressListener {
         setSimulationMode(true);
         initBindings();
         initFromPrefs();
+        initHelp();
+        checkDisclaimer();
+    }
+
+    private void initHelp() {
+        File file = new File(getClass().getResource("help.txt").getPath());
+        StringBuilder sb = new StringBuilder();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line = "";
+            while ((line = br.readLine()) != null) {
+                sb.append(line + "\n");
+            }
+            txtOut.setText(sb.toString());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void checkDisclaimer() {
+        if (!isDisclaimerConfirmed()) {
+            Dialog.Actions.YES.textProperty().set("Yes, use at my risk");
+            Dialog.Actions.NO.textProperty().set("No way");
+            Action action = Dialogs.create()
+                    .title("Disclaimer")
+                    .masthead("Do you want to use this software at your own risk?")
+                    .message("This software is done with care and was tested thoroughly. Nevertheless, the use of this software is completely at your own risk. The author of this software is not liable for any loss or damage that might occur to your data.")
+                    .showConfirm();
+            if (action != Dialog.Actions.YES) {
+                System.exit(0);
+            } else {
+                confirmDisclaimer();
+            }
+        }
     }
 
     private void initFromPrefs() {
         setSrcDirectory(new File(getSourceDirectoryFromPrefs()));
         setTargetDirectory(new File(getTargetDirectoryFromPrefs()));
-
     }
 
     /**
@@ -254,22 +328,24 @@ public class RenamerGUI implements ProgressListener {
         srcDirectory.addListener(new ChangeListener<File>() {
             @Override
             public void changed(ObservableValue<? extends File> observableValue, File oldFile, File newFile) {
-                if (newFile != null && newFile.isDirectory()) {
+                if (newFile != null) {
                     String path = newFile.getAbsolutePath();
                     lblSource.setText(path);
                     setSourceDirectoryToPrefs(path);
                 }
+                setSimulationMode(true);
             }
         });
         // reflect changes of targetDirectory in the GUI and store the new target dir to the preferences
         targetDirectory.addListener(new ChangeListener<File>() {
             @Override
             public void changed(ObservableValue<? extends File> observableValue, File oldFile, File newFile) {
-                if (newFile != null && newFile.isDirectory()) {
+                if (newFile != null) {
                     String path = newFile.getAbsolutePath();
                     lblTarget.setText(path);
                     setTargetDirectoryToPrefs(path);
                 }
+                setSimulationMode(true);
             }
         });
         btnRename.textProperty().bind(new When(simulationMode).then("Simulate renaming").otherwise("Execute renaming"));
@@ -293,6 +369,16 @@ public class RenamerGUI implements ProgressListener {
     private void setTargetDirectoryToPrefs(String path) {
         final Preferences preferences = getPreferences();
         preferences.put(TARGET_DIR, path);
+    }
+
+    private boolean isDisclaimerConfirmed() {
+        final Preferences preferences = getPreferences();
+        return preferences.getBoolean(DISCLAIMER, false);
+    }
+
+    private void confirmDisclaimer() {
+        final Preferences preferences = getPreferences();
+        preferences.putBoolean(DISCLAIMER, true);
     }
 
     /**
@@ -337,5 +423,12 @@ public class RenamerGUI implements ProgressListener {
                 txtOut.appendText(copyTask.toFormattedString() + "\n");
             }
         });
+    }
+
+    void resetPreferences() {
+        getPreferences();
+        getPreferences().remove(SRC_DIR);
+        getPreferences().remove(TARGET_DIR);
+        getPreferences().remove(DISCLAIMER);
     }
 }

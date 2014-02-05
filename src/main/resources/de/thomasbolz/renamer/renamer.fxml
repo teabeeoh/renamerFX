@@ -45,10 +45,12 @@
                 <ProgressBar fx:id="progressFiles" maxWidth="1.7976931348623157E308" prefWidth="-1.0" progress="0.0"
                              GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3"/>
                 <Button fx:id="btnRename" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#rename"
-                        text="Rename files" GridPane.columnIndex="0" GridPane.columnSpan="2147483647"
+                        text="Rename files" GridPane.columnIndex="1" GridPane.columnSpan="2147483647"
                         GridPane.rowIndex="4"/>
                 <TextArea fx:id="txtOut" prefHeight="231.0" prefWidth="572.0" wrapText="true" GridPane.columnIndex="0"
                           GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.rowIndex="5"/>
+                <Button fx:id="btnHelp" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#showHelp"
+                        text="Help" GridPane.columnIndex="0" GridPane.hgrow="NEVER" GridPane.rowIndex="4"/>
             </children>
             <columnConstraints>
                 <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity"/>
