@@ -25,3 +25,5 @@ The filenames are compiled from the name of the parent directory plus a trailing
 *  The files in TARGET are a 1:1 copy of their originals except for the name.
 *  No files are overwritten in TARGET.
 *  Files that comply with the following wildcards are not renamed or copied: ".*", "*.ini", "thumbs.db"
+  
+![Screenshot](http://www.thomasbolz.de/renamerFX/renamerFX.png "RenameFX Screenshot")
