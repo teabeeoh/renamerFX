@@ -1,8 +1,8 @@
-renamerFX
+renamerFX 
 =========
-### Thommis Picture Renamer
+### ![Icon](https://raw2.github.com/teabeeoh/renamerFX/master/src/deploy/package/shortcut-128.png "Icon") Thommis Picture Renamer 
 
-The purpose of this software is to batch rename your pictures and movies after taking them from the camera from cryptic
+ The purpose of this software is to batch rename your pictures and movies after taking them from the camera from cryptic
 to meaningful file names.
 The filenames are compiled from the name of the parent directory plus a trailing index.
 
