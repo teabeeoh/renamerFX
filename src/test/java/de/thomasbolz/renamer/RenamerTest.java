@@ -74,9 +74,8 @@ public class RenamerTest {
 //        log.debug(pathListMap);
 //
 //        log.debug(renamer.getExcludedFiles());
-        Assert.assertTrue(renamer.getExcludedFiles().size() >= 3);
+        Assert.assertEquals(3, renamer.getExcludedFiles().size());
         for (Path path : renamer.getExcludedFiles()) {
-            log.debug(path.toString());
             Assert.assertTrue(isExcludedFile(path.toString()));
         }
 
