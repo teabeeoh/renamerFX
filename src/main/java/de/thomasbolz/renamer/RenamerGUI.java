@@ -280,10 +280,10 @@ public class RenamerGUI implements ProgressListener {
     }
 
     private void initHelp() {
-        InputStream is = this.getClass().getResourceAsStream("/help.txt");
+        InputStream in = getClass().getResourceAsStream("help.txt");
         StringBuilder sb = new StringBuilder();
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String line = "";
             while ((line = br.readLine()) != null) {
                 sb.append(line + "\n");
