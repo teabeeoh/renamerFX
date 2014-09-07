@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * The Renamer is responsible for all steps in the renaming process:
@@ -42,8 +43,8 @@ public class Renamer {
     private final static String EXLUSION_REGEX = "\\..*|thumbs.db|.*\\.ini|\\.ds.*";
     private final static String INCLUSION_LIST = ".*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.mov|.*\\.avi|";
     private final List<Path> excludedFiles;
-    private final List<ProgressListener> progressListeners;
-    private double numberOfDirectories;
+//    private final List<ProgressListener> progressListeners;
+//    private double numberOfDirectories;
 
     /**
      * @return a list of all CopyTask that were found during the analysis.
@@ -70,7 +71,7 @@ public class Renamer {
         this.target = target;
         copyTasks = new TreeMap<>();
         excludedFiles = new ArrayList();
-        progressListeners = new ArrayList<>();
+//        progressListeners = new ArrayList<>();
     }
 
     /**
@@ -117,7 +118,7 @@ public class Renamer {
             e.printStackTrace();
         }
         sortCopyTasks();
-        generateTargetFilenames();
+//        generateTargetFilenames();
         return copyTasks;
     }
 
@@ -125,7 +126,7 @@ public class Renamer {
      * Sorts all CopyTasks in alphabetical order. This step must be done, as {@link java.nio.file.Files#walkFileTree(java.nio.file.Path, java.nio.file.FileVisitor)}
      * does not walk the file tree in any deterministic order.
      */
-    private void sortCopyTasks() {
+    void sortCopyTasks() {
         for (Path path : copyTasks.keySet()) {
             final List<CopyTask> copyTasks = this.copyTasks.get(path);
             Collections.sort(copyTasks, new Comparator<CopyTask>() {
@@ -137,33 +138,6 @@ public class Renamer {
         }
     }
 
-    /**
-     * The target file names are the name of the parent directory with an index number suffix.
-     */
-    private void generateTargetFilenames() {
-        log.debug("FXThread: " + Platform.isFxApplicationThread());
-        updateDirectoryProgress(0);
-        updateFileProgress(0);
-        int dirCounter = 1;
-        for (Path path : copyTasks.keySet()) {
-            int fileCounter = 1;
-            updateDirectoryProgress(dirCounter / getNumberOfDirectories());
-            updateFileProgress(0);
-            for (CopyTask copyTask : copyTasks.get(path)) {
-                updateFileProgress(fileCounter / ((double) copyTasks.get(path).size()));
-                String targetFilename = path.getFileName() + "_" + String.format("%02d", fileCounter) + "." + copyTask.getSourceFile().toString().substring(copyTask.getSourceFile().toString().lastIndexOf('.') + 1).toLowerCase();
-                copyTask.setTargetFile(target.resolve(source.relativize(Paths.get(path.toString(), targetFilename))));
-                fileCounter++;
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            dirCounter++;
-        }
-
-    }
 
 
     /**
@@ -185,7 +159,7 @@ public class Renamer {
             }
             for (CopyTask task : copyTasks.get(dir)) {
                 try {
-                    updateCurrentCopyTask(task);
+//                    updateCurrentCopyTask(task);
                     Files.copy(task.getSourceFile(), task.getTargetFile());
                 } catch (FileAlreadyExistsException e) {
                     log.info("File already exists " + task.getTargetFile());
@@ -201,8 +175,28 @@ public class Renamer {
      * Returns the total number of directories, that were found during step 1.
      * @return
      */
-    public double getNumberOfDirectories() {
-        return (double) copyTasks.size();
+    public Integer getNumberOfDirectories() {
+        return copyTasks.size();
+    }
+
+    public Path getSource() {
+        return source;
+    }
+
+    public Path getTarget() {
+        return target;
+    }
+
+    public String getExclusionRegEx() {
+        return EXLUSION_REGEX;
+    }
+
+    public Integer getNumberOfFiles() {
+        Integer result = 0;
+        for (List<CopyTask> list:copyTasks.values()) {
+            result += list.size();
+        }
+        return result;
     }
 
 //    private class DefaultFileFilter implements FileFilter {
@@ -222,47 +216,47 @@ public class Renamer {
      * Adds a ProgressListener to this Renamer. All ProgressListeners are notified on the progress during the execution tasks.
      * @param listener
      */
-    public void addProgressListener(ProgressListener listener) {
-        progressListeners.add(listener);
-    }
+//    public void addProgressListener(ProgressListener listener) {
+//        progressListeners.add(listener);
+//    }
 
     /**
      * Removes a ProgressListener from this Renamer.
      * @param listener
      */
-    public void removeProgressListener(ProgressListener listener) {
-        progressListeners.remove(listener);
-    }
+//    public void removeProgressListener(ProgressListener listener) {
+//        progressListeners.remove(listener);
+//    }
 
     /**
      * Notify all ProgressListeners about the directory progress.
      * @param progress
      */
-    private void updateDirectoryProgress(double progress) {
-        for (ProgressListener listener : progressListeners) {
-            listener.directoryProgressChanged(progress);
-        }
-    }
+//    private void updateDirectoryProgress(double progress) {
+//        for (ProgressListener listener : progressListeners) {
+//            listener.directoryProgressChanged(progress);
+//        }
+//    }
 
     /**
      * Notify all ProgressListeners about the file progress.
      * @param progress
      */
-    private void updateFileProgress(double progress) {
-        for (ProgressListener listener : progressListeners) {
-            listener.fileProgressChanged(progress);
-        }
-    }
+//    private void updateFileProgress(double progress) {
+//        for (ProgressListener listener : progressListeners) {
+//            listener.fileProgressChanged(progress);
+//        }
+//    }
 
     /**
      * Notify all ProgressListeners about hte current CopyTask.
      * @param copyTask
      */
-    private void updateCurrentCopyTask(CopyTask copyTask) {
-        for (ProgressListener listener : progressListeners) {
-            listener.currentCopyTaskChanged(copyTask);
-        }
-    }
+//    private void updateCurrentCopyTask(CopyTask copyTask) {
+//        for (ProgressListener listener : progressListeners) {
+//            listener.currentCopyTaskChanged(copyTask);
+//        }
+//    }
 
 
 }
