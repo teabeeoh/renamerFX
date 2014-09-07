@@ -22,6 +22,8 @@ public class Test {
     String filename2 = "file1.png";
     String filename3 = ".DS_Store";
     String filename4 = "file1png";
+    String filename5 = "file1.TXT";
+    String filename6 = "file1.PNG";
 
     public static void main(String[] args) {
         Test test = new Test();
@@ -34,6 +36,8 @@ public class Test {
         System.out.println(filename2 + "\t" + filename2.matches(pattern));
         System.out.println(filename3 + "\t" + filename3.matches(pattern));
         System.out.println(filename4 + "\t" + filename4.matches(pattern));
+        System.out.println(filename5 + "\t" + filename5.toLowerCase().matches(pattern));
+        System.out.println(filename6 + "\t" + filename6.toLowerCase().matches(pattern));
     }
 
 }
