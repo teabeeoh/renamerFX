@@ -217,9 +217,10 @@ public class RenamerGUI {
             renamer = new Renamer(getSrcDirectory().toPath(), getTargetDirectory().toPath());
             FileTreeAnalysisTask task = new FileTreeAnalysisTask(renamer);
             task.messageProperty().addListener((observableValue, s, s2) -> txtOut.appendText(task.getMessage()+"\n"));
-            task.setOnSucceeded(workerStateEvent -> btnRename.setDisable(false));
-            task.setOnFailed(workerStateEvent -> btnRename.setDisable(false));
-            progressDirs.progressProperty().bind(task.progressProperty());
+            EventHandler<WorkerStateEvent> enableButtonRename = (workerStateEvent) -> btnRename.setDisable(false);
+            task.setOnSucceeded(enableButtonRename);
+            task.setOnFailed(enableButtonRename);
+//            progressDirs.progressProperty().bind(task.progressProperty());
             new Thread(task).start();
 //            Runnable myTask = new Runnable() {
 //                @Override
@@ -261,15 +262,16 @@ public class RenamerGUI {
 //
 //            if (confirm == Dialog.Actions.YES) {
             txtOut.clear();
-            Task<Void> executeTask = new Task<Void>() {
-                @Override
-                protected Void call() throws Exception {
-                    log.info("Running on FXThread:" + Platform.isFxApplicationThread());
-                    renamer.executeCopyTasks();
-                    return null;
-                }
-            };
-            Thread th = new Thread(executeTask);
+            btnRename.setDisable(true);
+            ExecuteCopyTask task = new ExecuteCopyTask(renamer);
+            EventHandler<WorkerStateEvent> enableButtonRename = (workerStateEvent) -> btnRename.setDisable(false);
+            task.setOnSucceeded(enableButtonRename);
+            task.setOnFailed(enableButtonRename);
+            progressDirs.progressProperty().bind(task.dirProgressProperty());
+            progressFiles.progressProperty().bind(task.fileProgressProperty());
+            txtOut.textProperty().bind(task.messageProperty());
+
+            Thread th = new Thread(task);
             th.setDaemon(true);
             th.start();
 //            } else {
