@@ -99,9 +99,12 @@ public class FileTreeAnalysisTask extends Task<Renamer> {
 //            updateProgress(dirCounter,renamer.getNumberOfDirectories());
 //            updateDirectoryProgress(dirCounter / getNumberOfDirectories());
 //            updateFileProgress(0);
+            // get number of files to determine number of index digits
+            final long numberOfFiles = ((Integer)renamer.getCopyTasks().get(path).size()).toString().length();
+            String indexFormat = "%0" + numberOfFiles + "d";
             for (CopyTask copyTask : renamer.getCopyTasks().get(path)) {
 //                updateFileProgress(fileCounter / ((double) copyTasks.get(path).size()));
-                String targetFilename = path.getFileName() + "_" + String.format("%02d", fileCounter) + "." + copyTask.getSourceFile().toString().substring(copyTask.getSourceFile().toString().lastIndexOf('.') + 1).toLowerCase();
+                String targetFilename = path.getFileName() + "_" + String.format(indexFormat, fileCounter) + "." + copyTask.getSourceFile().toString().substring(copyTask.getSourceFile().toString().lastIndexOf('.') + 1).toLowerCase();
                 copyTask.setTargetFile(renamer.getTarget().resolve(renamer.getSource().relativize(Paths.get(path.toString(), targetFilename))));
                 fileCounter++;
                 try {
