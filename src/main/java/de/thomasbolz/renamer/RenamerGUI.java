@@ -23,6 +23,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -246,8 +247,18 @@ public class RenamerGUI implements ProgressListener {
 //                    .showConfirm();
 //
 //            if (confirm == Dialog.Actions.YES) {
-//                txtOut.clear();
-            renamer.executeCopyTasks();
+            txtOut.clear();
+            Task<Void> executeTask = new Task<Void>() {
+                @Override
+                protected Void call() throws Exception {
+                    log.info("Running on FXThread:" + Platform.isFxApplicationThread());
+                    renamer.executeCopyTasks();
+                    return null;
+                }
+            };
+            Thread th = new Thread(executeTask);
+            th.setDaemon(true);
+            th.start();
 //            } else {
 //                log.debug("not confirmed");
 //            }
@@ -280,10 +291,10 @@ public class RenamerGUI implements ProgressListener {
     }
 
     private void initHelp() {
-        InputStream is = this.getClass().getResourceAsStream("/help.txt");
+        InputStream in = getClass().getResourceAsStream("help.txt");
         StringBuilder sb = new StringBuilder();
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String line = "";
             while ((line = br.readLine()) != null) {
                 sb.append(line + "\n");
