@@ -107,11 +107,11 @@ public class FileTreeAnalysisTask extends Task<Renamer> {
                 String targetFilename = path.getFileName() + "_" + String.format(indexFormat, fileCounter) + "." + copyTask.getSourceFile().toString().substring(copyTask.getSourceFile().toString().lastIndexOf('.') + 1).toLowerCase();
                 copyTask.setTargetFile(renamer.getTarget().resolve(renamer.getSource().relativize(Paths.get(path.toString(), targetFilename))));
                 fileCounter++;
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    Thread.sleep(10);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
             }
             dirCounter++;
         }
