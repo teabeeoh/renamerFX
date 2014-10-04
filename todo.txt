@@ -1,0 +1,4 @@
+Release 0.2
+* show bottom of log text
+* fix tests
+* tidy up code
