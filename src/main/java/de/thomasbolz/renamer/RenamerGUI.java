@@ -17,15 +17,12 @@
 package de.thomasbolz.renamer;
 
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.binding.When;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -42,9 +39,6 @@ import org.controlsfx.dialog.Dialog;
 import org.controlsfx.dialog.Dialogs;
 
 import java.io.*;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.SortedMap;
 import java.util.prefs.Preferences;
 
 /**
@@ -61,14 +55,14 @@ public class RenamerGUI {
     /**
      * Contains the source directory of the renaming operation.
      */
-    private SimpleObjectProperty<File> srcDirectory = new SimpleObjectProperty<File>(null);
+    private final SimpleObjectProperty<File> srcDirectory = new SimpleObjectProperty<File>(null);
     private Renamer renamer;
 
-    public File getSrcDirectory() {
+    File getSrcDirectory() {
         return srcDirectory.get();
     }
 
-    public void setSrcDirectory(File value) {
+    void setSrcDirectory(File value) {
         srcDirectory.set(value);
     }
 
@@ -79,13 +73,13 @@ public class RenamerGUI {
     /**
      * Contains the target directory of the renaming operation.
      */
-    private SimpleObjectProperty<File> targetDirectory = new SimpleObjectProperty<File>(null);
+    private final SimpleObjectProperty<File> targetDirectory = new SimpleObjectProperty<File>(null);
 
-    public File getTargetDirectory() {
+    File getTargetDirectory() {
         return targetDirectory.get();
     }
 
-    public void setTargetDirectory(File value) {
+    void setTargetDirectory(File value) {
         targetDirectory.set(value);
     }
 
@@ -96,13 +90,13 @@ public class RenamerGUI {
     /**
      * Flag indicating if we are in simulation mode (Renamer only shows what would happen) or not (Renamer actually executes the renaming).
      */
-    private BooleanProperty simulationMode = new SimpleBooleanProperty(true);
+    private final BooleanProperty simulationMode = new SimpleBooleanProperty(true);
 
-    public Boolean isSimulationMode() {
+    Boolean isSimulationMode() {
         return simulationMode.get();
     }
 
-    public void setSimulationMode(Boolean value) {
+    void setSimulationMode(Boolean value) {
         simulationMode.setValue(value);
     }
 
@@ -208,7 +202,7 @@ public class RenamerGUI {
      */
     @FXML
     void rename(ActionEvent event) {
-        if (checkDirectories(getSrcDirectory(), getTargetDirectory()) == false) {
+        if (!checkDirectories(getSrcDirectory(), getTargetDirectory())) {
             return;
         }
         if (isSimulationMode()) {
@@ -252,7 +246,6 @@ public class RenamerGUI {
 //            taskRunner.start();
 
             setSimulationMode(false);
-            return;
         } else {
 //            Action confirm = Dialogs.create()
 //                    .title("Confirm renaming")
@@ -269,16 +262,12 @@ public class RenamerGUI {
             task.setOnFailed(enableButtonRename);
             progressDirs.progressProperty().bind(task.dirProgressProperty());
             progressFiles.progressProperty().bind(task.fileProgressProperty());
-            txtOut.textProperty().bind(task.messageProperty());
+            task.progressMessageProperty().addListener((observableValue, s, s2) -> Platform.runLater(() -> txtOut.appendText(s2)));
 
             Thread th = new Thread(task);
             th.setDaemon(true);
             th.start();
-//            } else {
-//                log.debug("not confirmed");
-//            }
             setSimulationMode(true);
-            return;
         }
 
 
@@ -420,36 +409,6 @@ public class RenamerGUI {
     private Preferences getPreferences() {
         return Preferences.userNodeForPackage(getClass());
     }
-
-//    @Override
-//    public void directoryProgressChanged(final double progress) {
-//        Platform.runLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                progressDirs.setProgress(progress);
-//            }
-//        });
-//    }
-//
-//    @Override
-//    public void fileProgressChanged(final double progress) {
-//        Platform.runLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                progressFiles.setProgress(progress);
-//            }
-//        });
-//    }
-//
-//    @Override
-//    public void currentCopyTaskChanged(final CopyTask copyTask) {
-//        Platform.runLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                txtOut.appendText(copyTask.toFormattedString() + "\n");
-//            }
-//        });
-//    }
 
     void resetPreferences() {
         getPreferences();
