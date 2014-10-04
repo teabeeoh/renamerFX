@@ -56,6 +56,7 @@ public class ExecuteCopyTask extends Task<Renamer> {
     protected Renamer call() throws Exception {
         log.info("Start executing CopyTasks");
         long dirCounter = 0;
+        long time = System.currentTimeMillis();
         for (Path dir : renamer.getCopyTasks().keySet()) {
             Path targetDir = renamer.getTarget().resolve(renamer.getSource().relativize(dir));
             try {
@@ -84,7 +85,8 @@ public class ExecuteCopyTask extends Task<Renamer> {
             }
             updateDirProgress(++dirCounter, renamer.getCopyTasks().size());
         }
-        log.info("Finished executing CopyTasks");
+        final long totalTime = System.currentTimeMillis() - time;
+        updateProgessMessage("Finished executing CopyTasks in " + totalTime / 1000 + "s and "+totalTime%1000+"ms");
         return renamer;
     }
 
