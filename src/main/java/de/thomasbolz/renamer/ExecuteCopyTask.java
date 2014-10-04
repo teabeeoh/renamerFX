@@ -95,7 +95,7 @@ public class ExecuteCopyTask extends Task<Renamer> {
     }
 
     private void updateFileProgress(double workDone, double max) {
-        log.debug("FILE: workDon="+workDone);
+        log.debug("FILE: workDone="+workDone);
         log.debug("FILE: max="+max);
         log.debug("FILE: rate="+workDone/max);
         fileProgress.set(workDone / max);
