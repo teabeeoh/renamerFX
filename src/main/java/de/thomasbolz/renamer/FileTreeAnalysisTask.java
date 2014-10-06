@@ -93,14 +93,21 @@ public class FileTreeAnalysisTask extends Task<Renamer> {
         log.debug("FXThread: " + Platform.isFxApplicationThread());
         int dirCounter = 1;
         for (Path path : renamer.getCopyTasks().keySet()) {
-            int fileCounter = 1;
+            int fileCounter = 0;
             // get number of files to determine number of index digits
             final long numberOfFiles = ((Integer) renamer.getCopyTasks().get(path).size()).toString().length();
             String indexFormat = "%0" + numberOfFiles + "d";
             for (CopyTask copyTask : renamer.getCopyTasks().get(path)) {
-                String targetFilename = path.getFileName() + "_" + String.format(indexFormat, fileCounter) + "." + copyTask.getSourceFile().toString().substring(copyTask.getSourceFile().toString().lastIndexOf('.') + 1).toLowerCase();
+                String extension = copyTask.getSourceFile().toString().substring(copyTask.getSourceFile().toString().lastIndexOf('.') + 1).toLowerCase();
+                if (!"orf".equals(extension)) {
+                    fileCounter++;
+                }
+                String indexedName = path.getFileName() + "_" + String.format(indexFormat, fileCounter) + ".";
+                String targetFilename = indexedName + extension;
+                log.debug(targetFilename);
+//                String targetFilename = path.getFileName() + "_" + String.format(indexFormat, fileCounter) + "." + copyTask.getSourceFile().toString().substring(copyTask.getSourceFile().toString().lastIndexOf('.') + 1).toLowerCase();
                 copyTask.setTargetFile(renamer.getTarget().resolve(renamer.getSource().relativize(Paths.get(path.toString(), targetFilename))));
-                fileCounter++;
+                log.debug(copyTask);
             }
             dirCounter++;
         }
