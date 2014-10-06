@@ -45,7 +45,7 @@ public class FileTreeAnalysisTask extends Task<Renamer> {
                                 throws IOException {
                             Path targetdir = renamer.getTarget().resolve(renamer.getSource().relativize(dir));
                             renamer.getCopyTasks().put(dir, new ArrayList<CopyTask>());
-                            log.info("dir="+dir);
+                            log.info("dir=" + dir);
                             updateMessage("Analyzing " + dir.toString());
                             try {
                                 Thread.sleep(100);
@@ -66,7 +66,8 @@ public class FileTreeAnalysisTask extends Task<Renamer> {
                             }
                             return FileVisitResult.CONTINUE;
                         }
-                    });
+                    }
+            );
         } catch (IOException e) {
             e.printStackTrace();
             log.error("IOException during directory analysis", e);
@@ -90,28 +91,16 @@ public class FileTreeAnalysisTask extends Task<Renamer> {
      */
     void generateTargetFilenames() {
         log.debug("FXThread: " + Platform.isFxApplicationThread());
-//        updateProgress(0, renamer.getNumberOfDirectories());
-//        updateDirectoryProgress(0);
-//        updateFileProgress(0);
         int dirCounter = 1;
         for (Path path : renamer.getCopyTasks().keySet()) {
             int fileCounter = 1;
-//            updateProgress(dirCounter,renamer.getNumberOfDirectories());
-//            updateDirectoryProgress(dirCounter / getNumberOfDirectories());
-//            updateFileProgress(0);
             // get number of files to determine number of index digits
-            final long numberOfFiles = ((Integer)renamer.getCopyTasks().get(path).size()).toString().length();
+            final long numberOfFiles = ((Integer) renamer.getCopyTasks().get(path).size()).toString().length();
             String indexFormat = "%0" + numberOfFiles + "d";
             for (CopyTask copyTask : renamer.getCopyTasks().get(path)) {
-//                updateFileProgress(fileCounter / ((double) copyTasks.get(path).size()));
                 String targetFilename = path.getFileName() + "_" + String.format(indexFormat, fileCounter) + "." + copyTask.getSourceFile().toString().substring(copyTask.getSourceFile().toString().lastIndexOf('.') + 1).toLowerCase();
                 copyTask.setTargetFile(renamer.getTarget().resolve(renamer.getSource().relativize(Paths.get(path.toString(), targetFilename))));
                 fileCounter++;
-//                try {
-//                    Thread.sleep(10);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
             }
             dirCounter++;
         }
