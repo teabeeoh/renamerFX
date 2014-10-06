@@ -23,8 +23,9 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -38,15 +39,12 @@ import org.controlsfx.dialog.Dialog;
 import org.controlsfx.dialog.Dialogs;
 
 import java.io.*;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.SortedMap;
 import java.util.prefs.Preferences;
 
 /**
  * Controller for the main GUI. The GUI is defined in renamer.fxml.
  */
-public class RenamerGUI implements ProgressListener {
+public class RenamerGUI {
 
     Log log = LogFactory.getLog(this.getClass());
 
@@ -57,14 +55,14 @@ public class RenamerGUI implements ProgressListener {
     /**
      * Contains the source directory of the renaming operation.
      */
-    private SimpleObjectProperty<File> srcDirectory = new SimpleObjectProperty<File>(null);
+    private final SimpleObjectProperty<File> srcDirectory = new SimpleObjectProperty<File>(null);
     private Renamer renamer;
 
-    public File getSrcDirectory() {
+    File getSrcDirectory() {
         return srcDirectory.get();
     }
 
-    public void setSrcDirectory(File value) {
+    void setSrcDirectory(File value) {
         srcDirectory.set(value);
     }
 
@@ -75,13 +73,13 @@ public class RenamerGUI implements ProgressListener {
     /**
      * Contains the target directory of the renaming operation.
      */
-    private SimpleObjectProperty<File> targetDirectory = new SimpleObjectProperty<File>(null);
+    private final SimpleObjectProperty<File> targetDirectory = new SimpleObjectProperty<File>(null);
 
-    public File getTargetDirectory() {
+    File getTargetDirectory() {
         return targetDirectory.get();
     }
 
-    public void setTargetDirectory(File value) {
+    void setTargetDirectory(File value) {
         targetDirectory.set(value);
     }
 
@@ -92,13 +90,13 @@ public class RenamerGUI implements ProgressListener {
     /**
      * Flag indicating if we are in simulation mode (Renamer only shows what would happen) or not (Renamer actually executes the renaming).
      */
-    private BooleanProperty simulationMode = new SimpleBooleanProperty(true);
+    private final BooleanProperty simulationMode = new SimpleBooleanProperty(true);
 
-    public Boolean isSimulationMode() {
+    Boolean isSimulationMode() {
         return simulationMode.get();
     }
 
-    public void setSimulationMode(Boolean value) {
+    void setSimulationMode(Boolean value) {
         simulationMode.setValue(value);
     }
 
@@ -204,41 +202,50 @@ public class RenamerGUI implements ProgressListener {
      */
     @FXML
     void rename(ActionEvent event) {
-        if (checkDirectories(getSrcDirectory(), getTargetDirectory()) == false) {
+        if (!checkDirectories(getSrcDirectory(), getTargetDirectory())) {
             return;
         }
         if (isSimulationMode()) {
             txtOut.clear();
-            Runnable myTask = new Runnable() {
-                @Override
-                public void run() {
-                    renamer = new Renamer(getSrcDirectory().toPath(), getTargetDirectory().toPath());
-                    renamer.addProgressListener(RenamerGUI.this);
-                    renamer.prepareCopyTasks();
-                    final SortedMap<Path, List<CopyTask>> copyTasks = renamer.getCopyTasks();
-                    StringBuilder sb = new StringBuilder();
-                    copyTasks.forEach((path, tasks) -> {
-                        sb.append(path);
-                        sb.append("\n");
-                        tasks.forEach(task -> {
-                            sb.append(task.toFormattedString());
-                            sb.append("\n");
-                        });
-                    });
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            txtOut.setText(sb.toString());
-                        }
-                    });
-                }
-            };
-            final Thread taskRunner = new Thread(myTask);
+            btnRename.setDisable(true);
+            renamer = new Renamer(getSrcDirectory().toPath(), getTargetDirectory().toPath());
+            FileTreeAnalysisTask task = new FileTreeAnalysisTask(renamer);
+            task.messageProperty().addListener((observableValue, s, s2) -> txtOut.appendText(task.getMessage()+"\n"));
+            EventHandler<WorkerStateEvent> enableButtonRename = (workerStateEvent) -> btnRename.setDisable(false);
+            task.setOnSucceeded(enableButtonRename);
+            task.setOnFailed(enableButtonRename);
+//            progressDirs.progressProperty().bind(task.progressProperty());
+            new Thread(task).start();
+//            Runnable myTask = new Runnable() {
+//                @Override
+//                public void run() {
+//                    renamer = new Renamer(getSrcDirectory().toPath(), getTargetDirectory().toPath());
+////                    renamer.addProgressListener(RenamerGUI.this);
+//                    renamer.prepareCopyTasks();
+//                    final SortedMap<Path, List<CopyTask>> copyTasks = renamer.getCopyTasks();
+//                    StringBuilder sb = new StringBuilder();
+//                    copyTasks.forEach((path, tasks) -> {
+//                        sb.append(path);
+//                        sb.append("\n");
+//                        tasks.forEach(task -> {
+//                            sb.append(task.toFormattedString());
+//                            sb.append("\n");
+//                        });
+//                    });
+//                    Platform.runLater(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            txtOut.setText(sb.toString());
+//                        }
+//                    });
+//                }
+//            };
+//            final Thread taskRunner = new Thread(myTask);
 //        taskRunner.setName("TaskRunner");
 //        taskRunner.setDaemon(true);
-            taskRunner.start();
+//            taskRunner.start();
+
             setSimulationMode(false);
-            return;
         } else {
 //            Action confirm = Dialogs.create()
 //                    .title("Confirm renaming")
@@ -248,22 +255,19 @@ public class RenamerGUI implements ProgressListener {
 //
 //            if (confirm == Dialog.Actions.YES) {
             txtOut.clear();
-            Task<Void> executeTask = new Task<Void>() {
-                @Override
-                protected Void call() throws Exception {
-                    log.info("Running on FXThread:" + Platform.isFxApplicationThread());
-                    renamer.executeCopyTasks();
-                    return null;
-                }
-            };
-            Thread th = new Thread(executeTask);
+            btnRename.setDisable(true);
+            ExecuteCopyTask task = new ExecuteCopyTask(renamer);
+            EventHandler<WorkerStateEvent> enableButtonRename = (workerStateEvent) -> btnRename.setDisable(false);
+            task.setOnSucceeded(enableButtonRename);
+            task.setOnFailed(enableButtonRename);
+            progressDirs.progressProperty().bind(task.dirProgressProperty());
+            progressFiles.progressProperty().bind(task.fileProgressProperty());
+            task.progressMessageProperty().addListener((observableValue, s, s2) -> Platform.runLater(() -> txtOut.appendText(s2)));
+
+            Thread th = new Thread(task);
             th.setDaemon(true);
             th.start();
-//            } else {
-//                log.debug("not confirmed");
-//            }
             setSimulationMode(true);
-            return;
         }
 
 
@@ -404,36 +408,6 @@ public class RenamerGUI implements ProgressListener {
 
     private Preferences getPreferences() {
         return Preferences.userNodeForPackage(getClass());
-    }
-
-    @Override
-    public void directoryProgressChanged(final double progress) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                progressDirs.setProgress(progress);
-            }
-        });
-    }
-
-    @Override
-    public void fileProgressChanged(final double progress) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                progressFiles.setProgress(progress);
-            }
-        });
-    }
-
-    @Override
-    public void currentCopyTaskChanged(final CopyTask copyTask) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                txtOut.appendText(copyTask.toFormattedString() + "\n");
-            }
-        });
     }
 
     void resetPreferences() {
